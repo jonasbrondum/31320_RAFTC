@@ -101,8 +101,38 @@ H_rf = vpa(simplify(V_ry*H_yf),4)
 %% Residual filter design
 
 %% Strong and weak detectability
-H_rf = tf(0);
+% H_rf = tf(0);
+% s = tf('s');
 
+% Weak detectabilities:
+% The ith fault is weakly detectable if and only if:
+% rank([ H_yd H^i_yf]) > rank(H_yd)
+dimH_yf = size(H_yf)
+weakly_detectable = zeros(dimH_yf(2));
+for i = 1:dimH_yf(2)
+    if rank([H_yd H_yf(:,i)]) > rank(H_yd)
+        txt = sprintf('Fault %d is weakly detectable',i);
+        disp(txt)
+        weakly_detectable(i) = 1;
+    end
+end
+
+% Now we check also if these are strongly detectable:
+% Strong detectability:
+% ith fault is strongly detectable if F(s)*[H^i_yf; 0]|s=0 != 0
+% so if that product with s evaluated at 0 is not zero then the fault is
+% also strongly detectable, aka it has a steady state gain different from
+% zero.
+added_zero_vector = zeros(2,1);
+s = 0;
+strongly_detectable = zeros(dimH_yf(2));
+for i = 1:dimH_yf(2)
+    if eval(F*[H_yf(:,i); added_zero_vector]) ~= added_zero_vector
+        txt = sprintf('Fault %d is strongly detectable',i);
+        disp(txt)
+        strongly_detectable(i) = 1;
+    end
+end
 %% GLR
 f_m = [0;-0.025;0];     % Sensor fault vector (added to [y1;y2;y3])
 h = 0;                  % Put the threshold from GLR here
@@ -118,21 +148,21 @@ B_change = [1 0;0 0];
 
 %% Simulation for sensor fault (f_u = 0)
 simTime = 45;                   % Simulation duration in seconds
-f_u_time = 25;                  % Actuator fault occurence time
-detect_time = f_u_time + 3.75;
-f_u = [0;0];                    % Actuator fault vector (added to [u1;u2])
-u_fault = 0;                    % Disable VA meachanism
-f_m_time = 8.5;                 % Sensor fault occurence time
-sim('threeDiskOscillatorRig');
+% f_u_time = 25;                  % Actuator fault occurence time
+% detect_time = f_u_time + 3.75;
+% f_u = [0;0];                    % Actuator fault vector (added to [u1;u2])
+% u_fault = 0;                    % Disable VA meachanism
+% f_m_time = 8.5;                 % Sensor fault occurence time
+% sim('threeDiskOscillatorRig');
 
 %% Simulation for actuator fault (f_m = 0)
-f_u = [0;-0.1];                 % Actuator fault vector (added to [u1;u2])
-u_fault = 1;                    % Enable VA meachanism
-f_m = [0;0;0];                  % Sensor fault vector (added to [y1;y2;y3])
-sim('threeDiskOscillatorRig_solution');
-
+% f_u = [0;-0.1];                 % Actuator fault vector (added to [u1;u2])
+% u_fault = 1;                    % Enable VA meachanism
+% f_m = [0;0;0];                  % Sensor fault vector (added to [y1;y2;y3])
+% sim('threeDiskOscillatorRig_solution');
+%  
 %% Plot settings
-set(0,'DefaultTextInterpreter','latex');
-set(0,'DefaultAxesFontSize',20);
-set(0,'DefaultLineLineWidth', 2);
+% set(0,'DefaultTextInterpreter','latex');
+% set(0,'DefaultAxesFontSize',20);
+% set(0,'DefaultLineLineWidth', 2);
 
