@@ -28,7 +28,8 @@ s = tf('s')
 sys = -s^2-(b_2*s-k_2-k_1)/J_2
 zeta=0.7;
 omega=sqrt(k_2/J_3)
-omega=T_s*100
+omega=10/4;
+
 
 lowpass1=omega^2/(s^2+2*zeta*omega*s+omega^2)
 
@@ -41,11 +42,11 @@ s = tf('s')
 F=[ 0 1/J_2 k_1/J_2 (-s^2*J_2-b_2*s-k_1-k_2)/J_2 k_2/J_2;
     0 0 0 k_2/J_3 (-J_3*s^2-b_3*s-k_2)/J_3];
     
-Q = [lowpass1 0;
-    0 lowpass1]
+%Q = [lowpass1 0;
+%    0 lowpass1]
 
-RG1 = c2d(Q(1,1)*F(1,:),T_s,'tustin')
-RG2 = c2d(Q(1,1)*F(2,:),T_s,'tustin')
+RG1 = c2d(lowpass1*F(1,:),T_s,'tustin')
+RG2 = c2d(lowpass1*F(2,:),T_s,'tustin')
 
 [num1 den1] = tfdata(RG1);
 [num2 den2] = tfdata(RG2);
@@ -146,6 +147,9 @@ detect_time = f_u_time + 3.75;
 f_u = [0;0];                    % Actuator fault vector (added to [u1;u2])
 u_fault = 0;                    % Disable VA meachanism
 f_m_time = 8.5;                 % Sensor fault occurence time
+
+save('Residual_generatorsQ2.mat');
+
 sim('threeDiskOscillatorRig');
 
 %% Simulation for actuator fault (f_m = 0)
