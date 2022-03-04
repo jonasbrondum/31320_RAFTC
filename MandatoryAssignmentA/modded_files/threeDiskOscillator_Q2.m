@@ -211,10 +211,12 @@ h = chi2inv(1 - P_F, 1)/2;                  % Put the threshold from GLR here
 syms zz gg;     % zz is the integrant variable (X), gg is lambda in symbolic
 pd_zz = 1/2*(zz/gg)^(-1/4)*exp((-zz + gg)/2)*besseli(-0.5, sqrt(gg*zz));
 % Density function expression
-% pd_zz = 1/(2^(0.5)*gamma(0.5))*zz^(-0.5)*exp(-zz/2); % FILL IN
+% pd_zz = 1/(2^(0.5)*gamma(0.5))*zz^(-0.5)*exp(-zz/2); % FILL INs
 p_zz = int(pd_zz, zz,2*h, Inf);  % FILL IN - Integrate over the probability space
 eq_1 = p_zz == P_M;  % FILL IN - Equation to be solved
 lambda = double(vpasolve(eq_1, gg)); %1.2625
+
+r=zeros(floor(M),1);
 %% M
 syms M
 mu_0 = 0;
@@ -224,7 +226,7 @@ sigma = Q_yr;
 
 eq_2 = lambda == M*(mu_1 - mu_0)^2/sigma^2;
 
-M = double(vpasolve(eq_2, M))
+M = double(+solve(eq_2, M))
 
 
 
