@@ -28,7 +28,8 @@ s = tf('s')
 sys = -s^2-(b_2*s-k_2-k_1)/J_2
 zeta=0.7;
 omega=sqrt(k_2/J_3)
-omega=10/4;
+% Originally we chose omega = 10/4
+omega=20; % From experiment 28/02 -> omega = 20 was a good value
 
 
 lowpass1=omega^2/(s^2+2*zeta*omega*s+omega^2)
@@ -176,7 +177,7 @@ Br = sysss.B;
 Cr = sysss.C;
 Dr = sysss.D;
 % The covariance of the "inputs" [u1 u2 y1 y2 y3] are given:
-Q_wr = sigma_y^2*eye(5);
+Q_wr = sigma_y^2*eye(5); % Should this be squared or not???? <-----
 Q_wr(1:2,1:2) = 0;
 
 syms q1 q2 q3 q4
@@ -209,14 +210,15 @@ h = chi2inv(1 - P_F, 1)/2;                  % Put the threshold from GLR here
 % For the window size it's slightly more of a hassle:
 % P_D = 
 syms zz gg;     % zz is the integrant variable (X), gg is lambda in symbolic
-pd_zz = 1/2*(zz/gg)^(-1/4)*exp((-zz + gg)/2)*besseli(-0.5, sqrt(gg*zz));
+
 % Density function expression
-% pd_zz = 1/(2^(0.5)*gamma(0.5))*zz^(-0.5)*exp(-zz/2); % FILL INs
+pd_zz = 1/2*(zz/gg)^(-1/4)*exp((-zz + gg)/2)*besseli(-0.5, sqrt(gg*zz));
 p_zz = int(pd_zz, zz,2*h, Inf);  % FILL IN - Integrate over the probability space
+
 eq_1 = p_zz == P_M;  % FILL IN - Equation to be solved
 lambda = double(vpasolve(eq_1, gg)); %1.2625
 
-r=zeros(floor(M),1);
+
 %% M
 syms M
 mu_0 = 0;
@@ -228,7 +230,7 @@ eq_2 = lambda == M*(mu_1 - mu_0)^2/sigma^2;
 
 M = double(+solve(eq_2, M))
 
-
+% r=zeros(floor(M),1);
 
 %% Virtual actuator
 % Failure in actuator 2
