@@ -125,71 +125,15 @@ H_rf = vpa(simplify(V_ry*H_yf),4)
 %% Residual filter design
 
 %% Strong and weak detectability
-%H_rf = tf(0);
+H_rf = tf(0);
 
-
-% All is denominated: [u1 u2 y1 y2 y3] -> [fa1 fa2 fa3 fa4 fa5]
-
-% Weak detectabilities:
-% The ith fault is weakly detectable if and only if:
-% rank([ H_yd H^i_yf]) > rank(H_yd)
-dimH_yf = size(H_yf)
-weakly_detectable = zeros(dimH_yf(2));
-for i = 1:dimH_yf(2)
-    if rank([H_yd H_yf(:,i)]) > rank(H_yd)
-        txt = sprintf('Fault %d is weakly detectable',i);
-        disp(txt)
-        weakly_detectable(i) = 1;
-    end
-end
-
-% Now we check also if these are strongly detectable:
-% Strong detectability:
-% ith fault is strongly detectable if F(s)*[H^i_yf; 0]|s=0 != 0
-% so if that product with s evaluated at 0 is not zero then the fault is
-% also strongly detectable, aka it has a steady state gain different from
-% zero.
-added_zero_vector = zeros(2,1);
-s = 0;
-strongly_detectable = zeros(dimH_yf(2));
-for i = 1:dimH_yf(2)
-    if eval(F*[H_yf(:,i); added_zero_vector]) ~= added_zero_vector
-        txt = sprintf('Fault %d is strongly detectable',i);
-        disp(txt)
-        strongly_detectable(i) = 1;
-    end
-end
-
-% D)
-% If the disturbance was known then at least there would be another
-% constraint available as a residual. This could result in better
-% detectability of the faults both in terms of u1, but also in terms of
-% weak versus strong detectability.
 %% Variance of residuals:
-% First we convert transfer function to state-space
 sysss = ss(RG2)
 sigma_y = 0.0093;
-Ar = sysss.A;
-Br = sysss.B;
-Cr = sysss.C;
-Dr = sysss.D;
-% The covariance of the "inputs" [u1 u2 y1 y2 y3] are given:
 Q_wr = sigma_y*eye(5);
 Q_wr(1:2,1:2) = 0;
 
-syms q1 q2 q3 q4
-% Now we do Lyapunov's equation to find Q_xr
-Q_xr = [q1 q2;
-        q3 q4];
-eq_lyap = 0*eye(2) == Ar*Q_xr + Q_xr*(Ar') + (Br*Q_wr*(Br'));
-
-[q1, q2, q3, q4] = vpasolve(eq_lyap, [q1, q2, q3, q4])
-
-Q_xr = [q1 q2;
-        q3 q4];
-
-Q_yr = Cr*Q_xr*Cr' + Dr*Q_wr*Dr'
-    
+% Now we do 
 %% GLR
 f_m = [0;-0.025;0];     % Sensor fault vector (added to [y1;y2;y3])
 
@@ -218,11 +162,11 @@ syms M
 mu_0 = 0;
 mu_1 = f_m(2);
 
-sigma = Q_yr;
+sigma = 0.0093;
 
 eq_2 = lambda == M*(mu_1 - mu_0)^2/sigma^2;
 
-M = double(vpasolve(eq_2, M))
+M = double(vpasolve(eq_2, M));
 
 
 
