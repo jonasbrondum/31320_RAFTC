@@ -133,6 +133,20 @@ H_rf = tf(0);
 f_m = [0;-0.025;0];     % Sensor fault vector (added to [y1;y2;y3])
 h = 0;                  % Put the threshold from GLR here
 
+% We want to make sure that the threshold P_F = 1 - chi2cdf(2*h, 1) and
+% -> h = chi2inv(1 - P_F, 1)/2
+% For the window size it's slightly more of a hassle:
+% P_D = 
+syms zz gg;     % zz is the integrant variable, gg is h in symbolic
+% Gamma distribution parameters
+k = 1/2;
+theta = 2;
+% Density function expression
+pd_zz = 1/(2^(0.5)*gamma(0.5))*zz^(-0.5)*exp(-zz/2); % FILL IN
+p_zz = int(pd_zz, zz,2*gg, Inf);  % FILL IN - Integrate over the probability space
+eq_1 = p_zz == P_F;  % FILL IN - Equation to be solved
+h = double(vpasolve(eq_1, gg)); 
+
 %% Virtual actuator
 % Failure in actuator 2
 % Do the desing first in continuous time
