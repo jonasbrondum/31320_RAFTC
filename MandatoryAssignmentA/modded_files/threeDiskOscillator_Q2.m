@@ -51,7 +51,9 @@ RG2 = c2d(lowpass1*F(2,:),T_s,'tustin')
 [num1 den1] = tfdata(RG1);
 [num2 den2] = tfdata(RG2);
 
-
+%residual 3
+RG3=c2d(lowpass1*F(1,4)/F(2,4),T_s,'tustin')
+[num3 den3] = tfdata(RG3);
 
 %% State space representation
 % x = [theta1, omega1, theta2, omega2, theta3, omega3] = [x1 .. x6]
