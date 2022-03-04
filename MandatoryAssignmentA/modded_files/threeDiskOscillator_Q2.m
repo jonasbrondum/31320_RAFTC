@@ -176,7 +176,7 @@ Br = sysss.B;
 Cr = sysss.C;
 Dr = sysss.D;
 % The covariance of the "inputs" [u1 u2 y1 y2 y3] are given:
-Q_wr = sigma_y*eye(5);
+Q_wr = sigma_y^2*eye(5);
 Q_wr(1:2,1:2) = 0;
 
 syms q1 q2 q3 q4

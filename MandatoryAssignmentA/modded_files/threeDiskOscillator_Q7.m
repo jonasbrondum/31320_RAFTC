@@ -98,8 +98,8 @@ H_yu = C*(s*I - A)^(-1)*B + D;
 H_yd = C*(s*I - A)^(-1)*E_x + E_y;
 H = [H_yu H_yd;
      eye(2) zeros(2,1)];
-F = (simplify(null(H')'));
-V_ry = F(:,1:3)
+F_res = (simplify(null(H')'));
+V_ry = F_res(:,1:3)
 H_rf = vpa(simplify(V_ry*H_yf),4)
 %% Residual filter design
 
@@ -132,7 +132,7 @@ added_zero_vector = zeros(2,1);
 s = 0;
 strongly_detectable = zeros(dimH_yf(2));
 for i = 1:dimH_yf(2)
-    if eval(F*[H_yf(:,i); added_zero_vector]) ~= added_zero_vector
+    if eval(F_res*[H_yf(:,i); added_zero_vector]) ~= added_zero_vector
         txt = sprintf('Fault %d is strongly detectable',i);
         disp(txt)
         strongly_detectable(i) = 1;
