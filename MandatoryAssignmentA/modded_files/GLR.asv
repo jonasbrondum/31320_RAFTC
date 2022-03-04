@@ -1,0 +1,40 @@
+function [H, g, r] = GLR(r_new, r)
+
+
+mu_0 = 0;
+sigma = 0.1;
+
+
+%sum = zeros(M,1):
+
+r = [r(2:end) r_new];
+
+
+sum_max = -1;
+
+for j=0:M
+    sum_square = sum(r(k-j+1:k),'all')^2/j
+    if(sum_max < sum_square)
+        sum_max = sum_sqare;
+    end
+    
+end
+g = 1/2/sigma/sigma*sum_max;
+
+
+
+g = 1/(2*sigma^2*M)*max(sum(r(k-M+1:k)-mu_0))^2;
+
+for k = M:length(r)
+
+    g(k) = 1/(2*sigma^2*M)*max(sum(r(k-M+1:k)-mu_0))^2;
+    sum(r(k-M+1:k)-mu_0)^2;
+    
+end
+
+
+%Using equation 7.35 from the book
+
+
+
+
