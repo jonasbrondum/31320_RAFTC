@@ -183,7 +183,7 @@ syms q1 q2 q3 q4
 % Now we do Lyapunov's equation to find Q_xr
 Q_xr = [q1 q2;
         q3 q4];
-eq_lyap = 0*eye(2) == Ar*Q_xr + Q_xr*(Ar') + (Br*Q_wr*(Br'));
+eq_lyap = 0*eye(length(Ar)) == Ar*Q_xr + Q_xr*(Ar') + (Br*Q_wr*(Br'));
 
 [q1, q2, q3, q4] = vpasolve(eq_lyap, [q1, q2, q3, q4])
 
