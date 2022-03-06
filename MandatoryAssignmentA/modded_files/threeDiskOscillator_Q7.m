@@ -19,7 +19,6 @@ w_th = 0.75;                    % Threshold angular velocity rad/s
 % The system states are [theta_1;omega_1;theta_2;omega_2;theta_3;omega_3]
 x_0 = [0;0;0;0;0;0];            % Initial conditions
 T_s = 0.004;                    % Sampling period
-sigma_meas = 0.0093*eye(3);     % Measurements covariance matrix
 
 %% Filtering
 
@@ -51,7 +50,9 @@ RG2 = c2d(lowpass1*F(2,:),T_s,'tustin')
 [num1 den1] = tfdata(RG1);
 [num2 den2] = tfdata(RG2);
 
-
+%residual 3
+RG3=c2d(lowpass1*F(1,4)/F(2,4),T_s,'tustin')
+[num3 den3] = tfdata(RG3);
 
 %% State space representation
 % x = [theta1, omega1, theta2, omega2, theta3, omega3] = [x1 .. x6]
@@ -80,28 +81,6 @@ E_y = double(jacobian(g, d));
 F_x = double(jacobian(f, faults));
 F_y = double(jacobian(g, faults));
 
-% Discrete time
-sys_d = c2d(ss(A, B, C, D), T_s);
-F_d = sys_d.A;
-G_d = sys_d.B;
-
-% State-feedback LQR design
-Q_c = diag([2 0 2 0 2.5 0.0024]);
-R_c = diag([10 10]);
-K_c = [];
-
-% Scaling of reference
-C_ref = [];
-
-% Kalman filter with friction estimation - DO NOT MODIFY
-F_aug = [F_d G_d(:,1);zeros(1,6) 1];
-G_aug = [G_d;0 0];
-C_aug = [C zeros(3,1)];
-% Kalman gain
-L_aug = dlqe(F_aug,eye(7),C_aug,1e-3*eye(7),deg2rad(0.0056)*eye(3));
-L_o = L_aug(1:6,:);
-L_d = L_aug(7,:);
-
 %% H_rf(s)
 % This transfer function from fault to residuals is first of all the
 % product: V_ry(s)*H_yf(s) = H_rf(s)
@@ -119,21 +98,77 @@ H_yu = C*(s*I - A)^(-1)*B + D;
 H_yd = C*(s*I - A)^(-1)*E_x + E_y;
 H = [H_yu H_yd;
      eye(2) zeros(2,1)];
-F = (simplify(null(H')'));
-V_ry = F(:,1:3)
+F_res = (simplify(null(H')'));
+V_ry = F_res(:,1:3)
 H_rf = vpa(simplify(V_ry*H_yf),4)
 %% Residual filter design
 
 %% Strong and weak detectability
-H_rf = tf(0);
+%H_rf = tf(0);
 
+
+% All is denominated: [u1 u2 y1 y2 y3] -> [fa1 fa2 fa3 fa4 fa5]
+
+% Weak detectabilities:
+% The ith fault is weakly detectable if and only if:
+% rank([ H_yd H^i_yf]) > rank(H_yd)
+dimH_yf = size(H_yf)
+weakly_detectable = zeros(dimH_yf(2));
+for i = 1:dimH_yf(2)
+    if rank([H_yd H_yf(:,i)]) > rank(H_yd)
+        txt = sprintf('Fault %d is weakly detectable',i);
+        disp(txt)
+        weakly_detectable(i) = 1;
+    end
+end
+
+% Now we check also if these are strongly detectable:
+% Strong detectability:
+% ith fault is strongly detectable if F(s)*[H^i_yf; 0]|s=0 != 0
+% so if that product with s evaluated at 0 is not zero then the fault is
+% also strongly detectable, aka it has a steady state gain different from
+% zero.
+added_zero_vector = zeros(2,1);
+s = 0;
+strongly_detectable = zeros(dimH_yf(2));
+for i = 1:dimH_yf(2)
+    if eval(F_res*[H_yf(:,i); added_zero_vector]) ~= added_zero_vector
+        txt = sprintf('Fault %d is strongly detectable',i);
+        disp(txt)
+        strongly_detectable(i) = 1;
+    end
+end
+
+% D)
+% If the disturbance was known then at least there would be another
+% constraint available as a residual. This could result in better
+% detectability of the faults both in terms of u1, but also in terms of
+% weak versus strong detectability.
 %% Variance of residuals:
+% First we convert transfer function to state-space
 sysss = ss(RG2)
 sigma_y = 0.0093;
+Ar = sysss.A;
+Br = sysss.B;
+Cr = sysss.C;
+Dr = sysss.D;
+% The covariance of the "inputs" [u1 u2 y1 y2 y3] are given:
 Q_wr = sigma_y*eye(5);
 Q_wr(1:2,1:2) = 0;
 
-% Now we do 
+syms q1 q2 q3 q4
+% Now we do Lyapunov's equation to find Q_xr
+Q_xr = [q1 q2;
+        q3 q4];
+eq_lyap = 0*eye(length(Ar)) == Ar*Q_xr + Q_xr*(Ar') + (Br*Q_wr*(Br'));
+
+[q1, q2, q3, q4] = vpasolve(eq_lyap, [q1, q2, q3, q4])
+
+Q_xr = [q1 q2;
+        q3 q4];
+
+Q_yr = Cr*Q_xr*Cr' + Dr*Q_wr*Dr'
+    
 %% GLR
 f_m = [0;-0.025;0];     % Sensor fault vector (added to [y1;y2;y3])
 
@@ -153,21 +188,49 @@ h = chi2inv(1 - P_F, 1)/2;                  % Put the threshold from GLR here
 syms zz gg;     % zz is the integrant variable (X), gg is lambda in symbolic
 pd_zz = 1/2*(zz/gg)^(-1/4)*exp((-zz + gg)/2)*besseli(-0.5, sqrt(gg*zz));
 % Density function expression
-% pd_zz = 1/(2^(0.5)*gamma(0.5))*zz^(-0.5)*exp(-zz/2); % FILL IN
+% pd_zz = 1/(2^(0.5)*gamma(0.5))*zz^(-0.5)*exp(-zz/2); % FILL INs
 p_zz = int(pd_zz, zz,2*h, Inf);  % FILL IN - Integrate over the probability space
 eq_1 = p_zz == P_M;  % FILL IN - Equation to be solved
-lambda = double(vpasolve(eq_1, gg)); %1.2625
+% lambda = double(vpasolve(eq_1, gg)); %1.2625
+
+r=zeros(floor(M),1);
 %% M
 syms M
 mu_0 = 0;
 mu_1 = f_m(2);
 
-sigma = 0.0093;
+sigma = Q_yr;
 
 eq_2 = lambda == M*(mu_1 - mu_0)^2/sigma^2;
 
-M = double(vpasolve(eq_2, M));
+M = double(+solve(eq_2, M))
 
+%% Question 7 - DLQR
+% 1 . Discretize the system
+
+% Discrete time
+sys_d = c2d(ss(A, B, C, D), T_s);
+F_d = sys_d.A;
+G_d = sys_d.B;
+
+% 2. 
+
+% State-feedback LQR design
+Q_c = diag([2 0 2 0 2.5 0.0024]);
+R_c = diag([10 10]);
+K_c = [];
+
+% Scaling of reference
+C_ref = [];
+
+% Kalman filter with friction estimation - DO NOT MODIFY
+F_aug = [F_d G_d(:,1);zeros(1,6) 1];
+G_aug = [G_d;0 0];
+C_aug = [C zeros(3,1)];
+% Kalman gain
+L_aug = dlqe(F_aug,eye(7),C_aug,1e-3*eye(7),deg2rad(0.0056)*eye(3));
+L_o = L_aug(1:6,:);
+L_d = L_aug(7,:);
 
 
 %% Virtual actuator
