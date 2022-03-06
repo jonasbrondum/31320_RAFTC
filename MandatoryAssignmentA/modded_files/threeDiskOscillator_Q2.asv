@@ -280,13 +280,13 @@ Q_c = [2, 0, 0, 0, 0, 0;
 R_c =[10, 0;
       0, 10];
 
-[K_c, S, CLP]=dlqr(F_d, G_d, Q_c, R_c);
+[K_c, S, CLP]=dlqr(A, B, Q_c, R_c);
 
 C_3 = [0 0 0 0 1 0];
 %% 
 
 
-C_ref=pinv(C_3*( eye(6)-F_d + G_d*K_c )^(-1) * G_d*K_c)
+C_ref=pinv((C_3*( eye(6)-F_d + G_d*K_c )^(-1) * G_d*K_c))
 
 
 
