@@ -46,7 +46,7 @@ F=[ 0 1/J_2 k_1/J_2 (-s^2*J_2-b_2*s-k_1-k_2)/J_2 k_2/J_2;
 %    0 lowpass1]
 
 RG1 = J_2*c2d(lowpass1*F(1,:),T_s,'tustin')
-RG2 = J_3*c2d(lowpass1*F(2,:),T_s,'tustin')
+RG2 = c2d(lowpass1*F(2,:),T_s,'tustin')
 
 [num1 den1] = tfdata(RG1);
 [num2 den2] = tfdata(RG2);
@@ -211,6 +211,9 @@ P_F = 0.0001;
 % Probability of missed detection
 P_M = 0.01;
 
+% Probability of detection
+P_D = 1 - P_M;
+
 
 h = chi2inv(1 - P_F, 1)/2;                  % Put the threshold from GLR here
 
@@ -218,18 +221,37 @@ h = chi2inv(1 - P_F, 1)/2;                  % Put the threshold from GLR here
 % -> h = chi2inv(1 - P_F, 1)/2
 % For the window size it's slightly more of a hassle:
 % P_D = 1 - P_M
-syms zz gg;     % zz is the integrant variable (X), gg is lambda in symbolic
+syms X M;     % zz is the integrant variable (X), gg is lambda in symbolic
 
+mu_1 = dcgain(RG2(4))*f_m(2);
+mu_0 = 0;
 
+lambda = (M*(mu_1 - mu_0)^2)/(sigma_yr^2);
+
+p_x2 = 0.5*(X/lambda)^(-0.25)*exp(-(X + lambda)/2)*besseli(-0.5, sqrt(lambda*X));
+integral = int(p_x2, X, 2*h, inf);
+
+M = floor(double(vpasolve([integral == P_D], [M], [0 3e5])))
 
 % Density function expression
-pd_zz = ( (1/2)*(zz/gg)^(-0.25) )* exp(-(zz + gg)/2)*besseli(-0.5, sqrt(gg*zz));
-p_zz = int(pd_zz, zz,2*h, Inf);  % FILL IN - Integrate over the probability space
-P_D = 1 - P_M;
-eq_1 = p_zz == P_D;  % FILL IN - Equation to be solved
+% pd_zz = ( (1/2)*(zz/gg)^(-0.25) )* exp(-(zz + gg)/2)*besseli(-0.5, sqrt(gg*zz));
+% p_zz = int(pd_zz, zz,2*h, Inf);  % FILL IN - Integrate over the probability space
+% eq_1 = p_zz == P_D;  % FILL IN - Equation to be solved
 % lambda = double(vpasolve(eq_1, gg)); %1.2625
 % lambda=1.2625;
+%% Test lambda
+clc;
+lambda = 0;
+for i = 0:0.1:100
+    pTest = ncx2cdf(2*h, 1, i);
+    if pTest < P_M
+        lambda = i;
+        break
+    end
+end
 
+disp(lambda)
+M = lambda*sigma_yr^2/((mu_1 - mu_0)^2)
 %% Tredje take
 syms M X
 
