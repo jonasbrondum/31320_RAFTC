@@ -360,7 +360,7 @@ L_d = L_aug(7,:);
 %% 
 
 
-C_ref=pinv(C_3*( eye(6)-F_d + G_d*K_c )^(-1) * G_d*K_c);
+C_ref=pinv(C_3*( eye(6)-F_d + G_d*K_c )^(-1) * G_d*K_c)
 
 
 %% Q8 - Virtual Actuator
@@ -370,51 +370,14 @@ u_fault = 1;                    % Enable VA meachanism
 f_m = [0;0;0];                  % Sensor fault vector (added to [y1;y2;y3])
 B_f = B(:,1)
 
-% 1. Can there be perfect static matching?
+% Can there be perfect static matching?
 if rank(B_f) == rank([B B_f])
     disp('Perfect static matching is possible')
 else
     disp('Imperfect static matching is possible')
 end
 
-% There is imperfect static matching as the condition above isn't fulfilled
-% This means we will have to sort to a dynamic reconfiguration.
-
-% 2. Simulation of fault with DLQR - no fault accomodation
-% Then design discret virtual actuator:
-G_f = G_d(:, 1);
-if rank(G_f) == rank([G_d G_f])
-    disp('Perfect static matching is possible')
-else
-    disp('Imperfect static matching is possible')
-end
-
-% We check controllability
-if rank(F_d) == rank(ctrb(F_d, G_f))
-    disp('Faulty system is controllable');
-else
-    disp('Faulty system is not controllable');
-end
-% It is controllable
-
-% Continuous time
-va_eig = log(eig(F_d - G_d*K_c))/T_s;
-M = place(A, B_f, va_eig);
-A_D = A - B_f*M;
-N_D = pinv(B_f)*B;
-B_D = B - B_f*N_D;
-C_D = C;
-
-% Discrete time
-va_eig_d = exp(va_eig*T_s);
-M_d = place(F_d, G_f, va_eig_d);
-F_D = F_d - G_f*M_d;
-N_D_d = pinv(G_f)*G_d;
-G_D = G_d - G_f*N_D_d;
-C_D = C;
-
-
-% 3. Implement and simulate with VA
+% There is imperfect static matching as the criteria above is
 
 % sim('threeDiskOscillatorRig_solution');
 
