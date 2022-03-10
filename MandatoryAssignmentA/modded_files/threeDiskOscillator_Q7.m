@@ -52,6 +52,30 @@ RG2 = c2d(lowpass1*F(2,:),T_s,'tustin')
 [num1 den1] = tfdata(RG1);
 [num2 den2] = tfdata(RG2);
 
+
+num12=cell2mat(num1(2));
+num13=cell2mat(num1(3));
+num14=cell2mat(num1(4));
+num15=cell2mat(num1(5));
+
+
+
+den12=cell2mat(den1(2));
+den13=cell2mat(den1(3));
+den14=cell2mat(den1(4));
+den15=cell2mat(den1(5));
+
+
+
+num24=cell2mat(num2(4));
+num25=cell2mat(num2(5));
+den24=cell2mat(den2(4));
+den25=cell2mat(den2(5));
+
+
+
+
+
 %residual 3
 RG3=c2d(lowpass1*F(1,4)/F(2,4),T_s,'tustin')
 [num3 den3] = tfdata(RG3);
@@ -241,35 +265,16 @@ va_eig = log(va_eig_d)/T_s;     % Continuous time eigenvalues
 
 B_change = [1 0;0 0];
 
-%% Simulation for sensor fault (f_u = 0)
-
-
-
-simTime = 45;                   % Simulation duration in seconds
-f_u_time = 25;                  % Actuator fault occurence time
-detect_time = f_u_time + 3.75;
-f_u = [0;0];                    % Actuator fault vector (added to [u1;u2])
-u_fault = 0;                    % Disable VA meachanism
-f_m_time = 8.5;                 % Sensor fault occurence time
-
-save('Residual_generatorsQ2.mat');
-
-sim('threeDiskOscillatorRig');
-
-%% Simulation for actuator fault (f_m = 0)
-f_u = [0;-0.1];                 % Actuator fault vector (added to [u1;u2])
-u_fault = 1;                    % Enable VA meachanism
-f_m = [0;0;0];                  % Sensor fault vector (added to [y1;y2;y3])
-B_f=B(:,1)
-sim('threeDiskOscillatorRig_solution');
-
-%% Plot settings
-set(0,'DefaultTextInterpreter','latex');
-set(0,'DefaultAxesFontSize',20);
-set(0,'DefaultLineLineWidth', 2);
 
 %% DLQR, Q7
+simTime = 45;                   % Simulation duration in seconds
+f_u_time = simTime;                  % Actuator fault occurence time
+detect_time = simTime;
+f_u = [0;0];                    % Actuator fault vector (added to [u1;u2])
+u_fault = 0;                    % Disable VA meachanism
+f_m_time = simTime;                 % Sensor fault occurence time
 
+B_f=B(:,1)
 
 Q_c = [2, 0, 0, 0, 0, 0;
        0, 0, 0, 0, 0, 0;
@@ -290,6 +295,53 @@ C_ref=pinv(C_3*( eye(6)-F_d + G_d*K_c )^(-1) * G_d*K_c)
 
 
 
+
+
+%% Simulation for sensor fault (f_u = 0)
+
+
+
+simTime = 45;                   % Simulation duration in seconds
+f_u_time = 25;                  % Actuator fault occurence time
+detect_time = f_u_time + 3.75;
+f_u = [0;0];                    % Actuator fault vector (added to [u1;u2])
+u_fault = 0;                    % Disable VA meachanism
+f_m_time = 8.5;                 % Sensor fault occurence time
+
+save('Residual_generatorsQ2.mat');
+
+sim('threeDiskOscillatorRig');
+
+%% Simulation for actuator fault (f_m = 0)
+f_u = [0;-0.1];                 % Actuator fault vector (added to [u1;u2])
+u_fault = 1;                    % Enable VA meachanism
+f_m = [0;0;0];                  % Sensor fault vector (added to [y1;y2;y3])
+B_f=B(:,1)
+
+%% Plot settings
+set(0,'DefaultTextInterpreter','latex');
+set(0,'DefaultAxesFontSize',20);
+set(0,'DefaultLineLineWidth', 2);
+
+
+%% Testing without faults
+
+detect_time = 45;
+f_u_time=45;
+
+figure
+plot(y_meas);
+hold on
+xlabel('Time [sec]','FontName','times','FontSize',16,'Interpreter','latex')
+ylabel('$\mathbf{\theta} [rad]$','FontName','times','FontSize',16,'Interpreter','latex')
+l = legend('$x_1(t)$','$x_2(t)$','$x_2(t)$','Location','NorthEast');
+set(l,'FontName','times','FontSize',16,'Interpreter','latex');
+
+hold off
+
+%% load real data
+
+load('Experiment\Second_run.mat');
 
 
 
