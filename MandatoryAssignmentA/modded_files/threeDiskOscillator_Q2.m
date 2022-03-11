@@ -110,9 +110,6 @@ H_rf = vpa(simplify(V_ry*H_yf),4)
 %% Residual filter design
 
 %% Strong and weak detectability
-%H_rf = tf(0);
-
-
 % All is denominated: [u1 u2 y1 y2 y3] -> [fa1 fa2 fa3 fa4 fa5]
 
 % Weak detectabilities:
@@ -152,7 +149,7 @@ end
 % weak versus strong detectability.
 %% Variance of residuals:
 % First we convert transfer function to state-space
-sysss = ss(RG2)
+sysss = ss(d2c(RG2))
 sigma_y = 0.0093;
 Ar = sysss.A;
 Br = sysss.B;
@@ -181,7 +178,7 @@ syms q1 q2 q3 q4
 % % Since this is sigma_yr^2 we have to take the square root:
 % sigma_yr = double(sqrt(Q_yr))
 
-Q_xr = dlyap(Ar, Br*Q_wr*Br');
+Q_xr = lyap(Ar, Br*Q_wr*Br');
 Q_yr = Cr*Q_xr*Cr' + Dr*Q_wr*Dr';
 
 sigma_yr = sqrt(Q_yr)
@@ -224,22 +221,22 @@ M = floor(double(vpasolve([integral == P_D], [M], [0 3e5])))
 % lambda=1.2625;
 %% Test lambda
 clc;
-lambda = 0:0.1:100;
-pTest = ncx2cdf(2*h, 1, lambda);
-pTest2 = 1 - ncx2cdf(2*h, 1, lambda);
-% for i = 0:0.1:1000
-%     pTest = ncx2cdf(2*h, 1, i);
-%     if pTest < P_M
-%         lambda = i;
-%         break
-%     end
-% end
-hold on
-plot(lambda, pTest)
-plot(lambda, pTest2)
+% lambda = 0:0.1:100;
+% pTest = ncx2cdf(2*h, 1, lambda);
+% pTest2 = 1 - ncx2cdf(2*h, 1, lambda);
+for i = 1:100
+    pTest = ncx2cdf(2*h, 1, i*(mu_1^2)/(sigma_yr^2));
+    if pTest < P_M
+        M = i
+        break
+    end
+end
+% hold on
+% plot(lambda, pTest)
+% plot(lambda, pTest2)
 % disp(lambda)
-M = lambda*sigma_yr^2/((mu_1 - mu_0)^2)
-plot(lambda, M)
+% M = lambda*sigma_yr^2/((mu_1 - mu_0)^2)
+% plot(lambda, M)
 %% Tredje take
 syms M X
 
