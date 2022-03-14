@@ -1,4 +1,4 @@
-clear;
+clear all;
 close all;
 clc;
 load('ECP_values.mat');
@@ -27,6 +27,7 @@ s = tf('s')
 
 sys = -s^2-(b_2*s-k_2-k_1)/J_2
 zeta=0.7;
+omega=sqrt(k_2/J_3)
 % Originally we chose omega = 10/4
 omega=10; % From experiment 28/02 -> omega = 20 was a good value
 
@@ -45,11 +46,35 @@ F=[ 0 1/J_2 k_1/J_2 (-s^2*J_2-b_2*s-k_1-k_2)/J_2 k_2/J_2;
 %Q = [lowpass1 0;
 %    0 lowpass1]
 
-RG1 = J_2*c2d(lowpass1*F(1,:),T_s,'tustin')
-RG2 = J_3*c2d(lowpass1*F(2,:),T_s,'tustin')
+RG1 = c2d(lowpass1*F(1,:),T_s,'tustin')
+RG2 = c2d(lowpass1*F(2,:),T_s,'tustin')
 
 [num1 den1] = tfdata(RG1);
 [num2 den2] = tfdata(RG2);
+
+
+num12=cell2mat(num1(2));
+num13=cell2mat(num1(3));
+num14=cell2mat(num1(4));
+num15=cell2mat(num1(5));
+
+
+
+den12=cell2mat(den1(2));
+den13=cell2mat(den1(3));
+den14=cell2mat(den1(4));
+den15=cell2mat(den1(5));
+
+
+
+num24=cell2mat(num2(4));
+num25=cell2mat(num2(5));
+den24=cell2mat(den2(4));
+den25=cell2mat(den2(5));
+
+
+
+
 
 %residual 3
 RG3=c2d(lowpass1*F(1,4)/F(2,4),T_s,'tustin')
@@ -86,6 +111,23 @@ F_y = double(jacobian(g, faults));
 sys_d = c2d(ss(A, B, C, D), T_s);
 F_d = sys_d.A;
 G_d = sys_d.B;
+
+% State-feedback LQR design
+Q_c = diag([2 0 2 0 2.5 0.0024]);
+R_c = diag([10 10]);
+K_c = [];
+
+% Scaling of reference
+C_ref = [];
+
+% Kalman filter with friction estimation - DO NOT MODIFY
+F_aug = [F_d G_d(:,1);zeros(1,6) 1];
+G_aug = [G_d;0 0];
+C_aug = [C zeros(3,1)];
+% Kalman gain
+L_aug = dlqe(F_aug,eye(7),C_aug,1e-3*eye(7),deg2rad(0.0056)*eye(3));
+L_o = L_aug(1:6,:);
+L_d = L_aug(7,:);
 
 %% H_rf(s)
 % This transfer function from fault to residuals is first of all the
@@ -159,32 +201,22 @@ Br = sysss.B;
 Cr = sysss.C;
 Dr = sysss.D;
 % The covariance of the "inputs" [u1 u2 y1 y2 y3] are given:
-Q_wr = sigma_y^2*eye(5); % Should be squared
+Q_wr = sigma_y^2*eye(5); % Should this be squared or not???? <-----
+Q_wr(1:2,1:2) = 0;
 
 syms q1 q2 q3 q4
 % Now we do Lyapunov's equation to find Q_xr
-% Q_xr = [q1 q2;
-%         q3 q4];
-% eq_lyap = 0*eye(length(Ar)) == Ar*Q_xr + Q_xr*(Ar') + (Br*Q_wr*(Br'));
+Q_xr = [q1 q2;
+        q3 q4];
+eq_lyap = 0*eye(length(Ar)) == Ar*Q_xr + Q_xr*(Ar') + (Br*Q_wr*(Br'));
 
-% [q1, q2, q3, q4] = vpasolve(eq_lyap, [q1, q2, q3, q4])
-% Q_test = Br*Q_wr*(Br');
-% 
-% Q_xr = dlyap(Ar, Q_test);
-% 
-% 
-% % Q_xr = [q1 q2;
-% %         q3 q4];
-% 
-% Q_yr = Cr*Q_xr*Cr' + Dr*Q_wr*Dr';
-%     
-% % Since this is sigma_yr^2 we have to take the square root:
-% sigma_yr = double(sqrt(Q_yr))
+[q1, q2, q3, q4] = vpasolve(eq_lyap, [q1, q2, q3, q4])
 
-Q_xr = dlyap(Ar, Br*Q_wr*Br');
-Q_yr = Cr*Q_xr*Cr' + Dr*Q_wr*Dr';
+Q_xr = [q1 q2;
+        q3 q4];
 
-sigma_yr = sqrt(Q_yr)
+Q_yr = Cr*Q_xr*Cr' + Dr*Q_wr*Dr'
+    
 %% GLR
 f_m = [0;-0.025;0];     % Sensor fault vector (added to [y1;y2;y3])
 
@@ -194,106 +226,35 @@ P_F = 0.0001;
 % Probability of missed detection
 P_M = 0.01;
 
-% Probability of detection
-P_D = 1 - P_M;
-
 
 h = chi2inv(1 - P_F, 1)/2;                  % Put the threshold from GLR here
 
 % We want to make sure that the threshold P_F = 1 - chi2cdf(2*h, 1) and
 % -> h = chi2inv(1 - P_F, 1)/2
 % For the window size it's slightly more of a hassle:
-% P_D = 1 - P_M
-syms X M;     % zz is the integrant variable (X), gg is lambda in symbolic
-
-mu_1 = dcgain(RG2(4))*f_m(2);
-mu_0 = 0;
-
-lambda = (M*(mu_1 - mu_0)^2)/(sigma_yr^2);
-
-p_x2 = 0.5*(X/lambda)^(-0.25)*exp(-(X + lambda)/2)*besseli(-0.5, sqrt(lambda*X));
-integral = int(p_x2, X, 2*h, inf);
-
-%M = floor(double(vpasolve([integral == P_D], [M], [0 3e5])))
+% P_D = 
+syms zz gg;     % zz is the integrant variable (X), gg is lambda in symbolic
 
 % Density function expression
-% pd_zz = ( (1/2)*(zz/gg)^(-0.25) )* exp(-(zz + gg)/2)*besseli(-0.5, sqrt(gg*zz));
-% p_zz = int(pd_zz, zz,2*h, Inf);  % FILL IN - Integrate over the probability space
-% eq_1 = p_zz == P_D;  % FILL IN - Equation to be solved
-% lambda = double(vpasolve(eq_1, gg)); %1.2625
-% lambda=1.2625;
-%% Test lambda
-clc;
-lambda = 0:0.1:100;
-pTest = ncx2cdf(2*h, 1, lambda);
-pTest2 = 1 - ncx2cdf(2*h, 1, lambda);
-% for i = 0:0.1:1000
-%     pTest = ncx2cdf(2*h, 1, i);
-%     if pTest < P_M
-%         lambda = i;
-%         break
-%     end
-% end
-hold on
-plot(lambda, pTest)
-plot(lambda, pTest2)
-% disp(lambda)
-M = lambda*sigma_yr^2/((mu_1 - mu_0)^2)
-plot(lambda, M)
-%% Tredje take
-syms M X
+pd_zz = 1/2*(zz/gg)^(-1/4)*exp((-zz + gg)/2)*besseli(-0.5, sqrt(gg*zz));
+p_zz = int(pd_zz, zz,2*h, Inf);  % FILL IN - Integrate over the probability space
 
-P_D = 1 - P_M;
-nu_0=0;
+eq_1 = p_zz == P_M;  % FILL IN - Equation to be solved
+%lambda = double(vpasolve(eq_1, gg)); %1.2625
+lambda=1.2625;
 
-nu_1=dcgain(RG2(4))*f_m(2);
-
-% sigma = 0.1;
-
- 
-
-lambda=(M*(nu_1-nu_0)^2)/(sigma_c^2);
-
-p_x2=0.5*(X/lambda)^(-0.25)*exp(-(X+lambda)/2)*besseli(-0.5,sqrt(lambda*X));
-
-expression=int(p_x2,X,2*h,inf);
-
- 
-
-%Window size
-
-M=floor(double(vpasolve([expression==P_D],[M],[0 inf])))
-
-%% FOr loop attempt
-% M = 0;
-% mu_1 = dcgain(RG2(4))*f_m(2);
-% mu_0 = 0;
-% sigma_c = sigma_yr;
-% for i = 1:10
-%     lambda = i*((mu_1 - mu_0)^2)/(sigma_c^2);
-%     proba = ncx2cdf(2*h, 1, lambda);
-%     if proba < P_M
-%         M = i;
-%         break;
-%     end
-% end
-% disp(M)
 %% M
 syms M
 mu_0 = 0;
-mu_1 = f_m(2)*dcgain(RG2(4));
+mu_1 = f_m(2);
 
-sigma_c = double(sigma_yr);
+sigma_c = double(Q_yr);
 
-% eq_2 = lambda == M*(mu_1 - mu_0)^2/sigma_c^2;
+eq_2 = lambda == M*(mu_1 - mu_0)^2/sigma_c^2;
 
-M = (lambda*sigma_c^2)/((mu_1 - mu_0)^2)
+M = double(+solve(eq_2, M))
 
-% r_window=zeros(floor(M),1);
-
-%% Take 2
-%syms lambda
-%lambda = vpasolve(P_M = 1 - ncx2cdf(2*h, 1, lambda), lambda)
+r_window=zeros(floor(M),1);
 
 %% Virtual actuator
 % Failure in actuator 2
@@ -303,6 +264,38 @@ va_eig = log(va_eig_d)/T_s;     % Continuous time eigenvalues
 % Then discretise your VA
 
 B_change = [1 0;0 0];
+
+
+%% DLQR, Q7
+simTime = 45;                   % Simulation duration in seconds
+f_u_time = simTime;                  % Actuator fault occurence time
+detect_time = simTime;
+f_u = [0;0];                    % Actuator fault vector (added to [u1;u2])
+u_fault = 0;                    % Disable VA meachanism
+f_m_time = simTime;                 % Sensor fault occurence time
+
+B_f=B(:,1)
+
+Q_c = [2, 0, 0, 0, 0, 0;
+       0, 0, 0, 0, 0, 0;
+       0, 0, 2, 0, 0, 0;
+       0, 0, 0, 0, 0, 0;
+       0, 0, 0, 0, 2.5, 0;
+       0, 0, 0, 0, 0, 0.0024];
+R_c =[10, 0;
+      0, 10];
+
+[K_c, S, CLP]=dlqr(F_d, G_d, Q_c, R_c);
+
+C_3 = [0 0 0 0 1 0];
+%% 
+
+
+C_ref=pinv(C_3*( eye(6)-F_d + G_d*K_c )^(-1) * G_d*K_c)
+
+
+
+
 
 %% Simulation for sensor fault (f_u = 0)
 
@@ -319,110 +312,36 @@ save('Residual_generatorsQ2.mat');
 
 sim('threeDiskOscillatorRig');
 
+%% Simulation for actuator fault (f_m = 0)
+f_u = [0;-0.1];                 % Actuator fault vector (added to [u1;u2])
+u_fault = 1;                    % Enable VA meachanism
+f_m = [0;0;0];                  % Sensor fault vector (added to [y1;y2;y3])
+B_f=B(:,1)
 
 %% Plot settings
 set(0,'DefaultTextInterpreter','latex');
 set(0,'DefaultAxesFontSize',20);
 set(0,'DefaultLineLineWidth', 2);
 
-%% DLQR
 
+%% Testing without faults
 
-Q_c = [2, 0, 0, 0, 0, 0;
-       0, 0, 0, 0, 0, 0;
-       0, 0, 2, 0, 0, 0;
-       0, 0, 0, 0, 0, 0;
-       0, 0, 0, 0, 2.5, 0;
-       0, 0, 0, 0, 0, 0.0024];
-R_c =[10, 0;
-      0, 10];
+detect_time = 45;
+f_u_time=45;
 
-[K_c, S, CLP]=dlqr(F_d, G_d, Q_c, R_c);
+figure
+plot(y_meas);
+hold on
+xlabel('Time [sec]','FontName','times','FontSize',16,'Interpreter','latex')
+ylabel('$\mathbf{\theta} [rad]$','FontName','times','FontSize',16,'Interpreter','latex')
+l = legend('$x_1(t)$','$x_2(t)$','$x_2(t)$','Location','NorthEast');
+set(l,'FontName','times','FontSize',16,'Interpreter','latex');
 
-C_3 = [0 0 0 0 1 0];
+hold off
 
-% State-feedback LQR design
-% Q_c = diag([2 0 2 0 2.5 0.0024]);
-% R_c = diag([10 10]);
-% K_c = [];
+%% load real data
 
-% Scaling of reference
-% C_ref = [];
-
-% Kalman filter with friction estimation - DO NOT MODIFY
-F_aug = [F_d G_d(:,1);zeros(1,6) 1];
-G_aug = [G_d;0 0];
-C_aug = [C zeros(3,1)];
-% Kalman gain
-L_aug = dlqe(F_aug,eye(7),C_aug,1e-3*eye(7),deg2rad(0.0056)*eye(3));
-L_o = L_aug(1:6,:);
-L_d = L_aug(7,:);
-%% 
-
-C_ref=pinv(C_3*( eye(6)-F_d + G_d*K_c )^(-1) * G_d*K_c);
-
-
-
-
-
-%% Q8 - Virtual Actuator
-% Simulation for actuator fault (f_m = 0)
-f_u = [0;-0.1];                 % Actuator fault vector (added to [u1;u2])
-u_fault = 1;                    % Enable VA meachanism
-f_m = [0;0;0];                  % Sensor fault vector (added to [y1;y2;y3])
-B_f = B(:,1)
-
-% 1. Can there be perfect static matching?
-if rank(B_f) == rank([B B_f])
-    disp('Perfect static matching is possible')
-else
-    disp('Imperfect static matching is possible')
-end
-
-% There is imperfect static matching as the condition above isn't fulfilled
-% This means we will have to sort to a dynamic reconfiguration.
-
-% 2. Simulation of fault with DLQR - no fault accomodation
-% Then design discret virtual actuator:
-G_f = G_d(:, 1);
-if rank(G_f) == rank([G_d G_f])
-    disp('Perfect static matching is possible')
-else
-    disp('Imperfect static matching is possible')
-end
-
-% We check controllability
-if rank(F_d) == rank(ctrb(F_d, G_f))
-    disp('Faulty system is controllable');
-else
-    disp('Faulty system is not controllable');
-end
-% It is controllable
-
-% Continuous time
-va_eig = log(eig(F_d - G_d*K_c))/T_s;
-M = place(A, B_f, va_eig);
-A_D = A - B_f*M;
-N_D = pinv(B_f)*B;
-B_D = B - B_f*N_D;
-C_D = C;
-
-% Discrete time
-va_eig_d = exp(va_eig*T_s);
-M_d = place(F_d, G_f, va_eig_d);
-F_D = F_d - G_f*M_d;
-N_D_d = pinv(G_f)*G_d;
-G_D = G_d - G_f*N_D_d;
-C_D = C;
-
-
-% 3. Implement and simulate with VA
-
-% sim('threeDiskOscillatorRig_solution');
-
-
-
-
+load('Experiment\Second_run.mat');
 
 
 

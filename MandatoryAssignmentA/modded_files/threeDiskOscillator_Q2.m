@@ -211,7 +211,7 @@ lambda = (M*(mu_1 - mu_0)^2)/(sigma_yr^2);
 p_x2 = 0.5*(X/lambda)^(-0.25)*exp(-(X + lambda)/2)*besseli(-0.5, sqrt(lambda*X));
 integral = int(p_x2, X, 2*h, inf);
 
-M = floor(double(vpasolve([integral == P_D], [M], [0 3e5])))
+M = floor(double(vpasolve([integral == P_D], [M], [0 1000])))
 
 % Density function expression
 % pd_zz = ( (1/2)*(zz/gg)^(-0.25) )* exp(-(zz + gg)/2)*besseli(-0.5, sqrt(gg*zz));
@@ -224,13 +224,17 @@ clc;
 % lambda = 0:0.1:100;
 % pTest = ncx2cdf(2*h, 1, lambda);
 % pTest2 = 1 - ncx2cdf(2*h, 1, lambda);
-for i = 1:100
+for i = 1:0.1:100
     pTest = ncx2cdf(2*h, 1, i*(mu_1^2)/(sigma_yr^2));
     if pTest < P_M
         M = i
         break
     end
 end
+
+
+
+
 % hold on
 % plot(lambda, pTest)
 % plot(lambda, pTest2)
