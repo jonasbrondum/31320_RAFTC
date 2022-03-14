@@ -211,7 +211,7 @@ lambda = (M*(mu_1 - mu_0)^2)/(sigma_yr^2);
 p_x2 = 0.5*(X/lambda)^(-0.25)*exp(-(X + lambda)/2)*besseli(-0.5, sqrt(lambda*X));
 integral = int(p_x2, X, 2*h, inf);
 
-M = floor(double(vpasolve([integral == P_D], [M], [0 1000])))
+M = ceil(double(vpasolve([integral == P_D], [M], [0 200])))
 
 % Density function expression
 % pd_zz = ( (1/2)*(zz/gg)^(-0.25) )* exp(-(zz + gg)/2)*besseli(-0.5, sqrt(gg*zz));
@@ -224,78 +224,19 @@ clc;
 % lambda = 0:0.1:100;
 % pTest = ncx2cdf(2*h, 1, lambda);
 % pTest2 = 1 - ncx2cdf(2*h, 1, lambda);
-for i = 1:0.1:100
+for i = 1:100
     pTest = ncx2cdf(2*h, 1, i*(mu_1^2)/(sigma_yr^2));
     if pTest < P_M
-        M = i
+        M2 = i
         break
     end
 end
-
-
-
-
 % hold on
 % plot(lambda, pTest)
 % plot(lambda, pTest2)
 % disp(lambda)
 % M = lambda*sigma_yr^2/((mu_1 - mu_0)^2)
 % plot(lambda, M)
-%% Tredje take
-syms M X
-
-P_D = 1 - P_M;
-nu_0=0;
-
-nu_1=dcgain(RG2(4))*f_m(2);
-
-% sigma = 0.1;
-
- 
-
-lambda=(M*(nu_1-nu_0)^2)/(sigma_c^2);
-
-p_x2=0.5*(X/lambda)^(-0.25)*exp(-(X+lambda)/2)*besseli(-0.5,sqrt(lambda*X));
-
-expression=int(p_x2,X,2*h,inf);
-
- 
-
-%Window size
-
-M=floor(double(vpasolve([expression==P_D],[M],[0 inf])))
-
-%% FOr loop attempt
-% M = 0;
-% mu_1 = dcgain(RG2(4))*f_m(2);
-% mu_0 = 0;
-% sigma_c = sigma_yr;
-% for i = 1:10
-%     lambda = i*((mu_1 - mu_0)^2)/(sigma_c^2);
-%     proba = ncx2cdf(2*h, 1, lambda);
-%     if proba < P_M
-%         M = i;
-%         break;
-%     end
-% end
-% disp(M)
-%% M
-syms M
-mu_0 = 0;
-mu_1 = f_m(2)*dcgain(RG2(4));
-
-sigma_c = double(sigma_yr);
-
-% eq_2 = lambda == M*(mu_1 - mu_0)^2/sigma_c^2;
-
-M = (lambda*sigma_c^2)/((mu_1 - mu_0)^2)
-
-% r_window=zeros(floor(M),1);
-
-%% Take 2
-%syms lambda
-%lambda = vpasolve(P_M = 1 - ncx2cdf(2*h, 1, lambda), lambda)
-
 %% Virtual actuator
 % Failure in actuator 2
 % Do the desing first in continuous time
@@ -391,7 +332,7 @@ else
 end
 
 % We check controllability
-if rank(F_d) == rank(ctrb(F_d, G_f))
+if max(size(F_d)) == rank(ctrb(F_d, G_f))
     disp('Faulty system is controllable');
 else
     disp('Faulty system is not controllable');
@@ -416,6 +357,10 @@ C_D = C;
 
 
 % 3. Implement and simulate with VA
+
+% Block diagram is implemented in threeDiskOscillatorRig_Q6.slx
+
+
 
 % sim('threeDiskOscillatorRig_solution');
 
