@@ -132,10 +132,11 @@ end
 % also strongly detectable, aka it has a steady state gain different from
 % zero.
 added_zero_vector = zeros(2,1);
-s = 0;
+% s = 0;
 strongly_detectable = zeros(dimH_yf(2));
 for i = 1:dimH_yf(2)
-    if eval(F*[H_yf(:,i); added_zero_vector]) ~= added_zero_vector
+    disp(eval(subs(F*[H_yf(:,i); added_zero_vector],s,0)))
+    if eval(subs(F*[H_yf(:,i); added_zero_vector],s,0)) ~= added_zero_vector
         txt = sprintf('Fault %d is strongly detectable',i);
         disp(txt)
         strongly_detectable(i) = 1;
@@ -278,27 +279,6 @@ va_eig = log(va_eig_d)/T_s;     % Continuous time eigenvalues
 
 B_change = [1 0;0 0];
 
-%% Simulation for sensor fault (f_u = 0)
-
-
-f_m = [0;-0.025;0];     % Sensor fault vector (added to [y1;y2;y3])
-simTime = 45;                   % Simulation duration in seconds
-f_u_time = 25;                  % Actuator fault occurence time
-detect_time = f_u_time + 3.75;
-f_u = [0;0];                    % Actuator fault vector (added to [u1;u2])
-u_fault = 0;                    % Disable VA meachanism
-f_m_time = 8.5;                 % Sensor fault occurence time
-
-%save('Residual_generatorsQ2.mat');
-
-%sim('threeDiskOscillatorRig');
-
-
-%% Plot settings
-% set(0,'DefaultTextInterpreter','latex');
-% set(0,'DefaultAxesFontSize',20);
-% set(0,'DefaultLineLineWidth', 2);
-
 %% DLQR
 
 
@@ -395,6 +375,72 @@ C_D = C;
 
 
 % sim('threeDiskOscillatorRig_solution');
+
+%% Virtual sensor
+dimA = max(size(A));
+E = zeros(dimA, 1);
+E(2) = 1;
+A_aug = [A E;
+         zeros(1, dimA) 0];
+B_aug = [B; zeros(1, 2)];
+C_aug = [C zeros(3, 1)];
+rowC = max(size(x));
+colC = min(size(C));
+C_f = C;
+C_f(2,:) = zeros(1, rowC);
+C_f_aug = [C_f zeros(colC, 1)];
+
+if rank(C_f_aug) == rank([C_aug; C_f_aug])
+    disp('Perfect static matching for sensor fault');
+else
+    disp('Imperfect static matching for sensor fault');
+end
+
+if max(size(A_aug)) == rank(obsv(A_aug, C_f_aug)')
+    disp('Faulty system is observable');
+else
+    disp('Faulty system is not observable');
+end
+% Continuous time
+vs_eig = [-20 -41 -52 -45 -23 -25 -25];
+L_V = place(A_aug', C_f_aug', vs_eig)';
+A_V = A_aug - L_V*C_f_aug;
+B_V = B_aug;
+P_V = C_aug*pinv(C_f_aug);
+C_V = C_aug - P_V*C_f_aug;
+
+% Discrete time
+F_aug = [F_d E;
+         zeros(1, dimA) 1];
+G_aug = [G_d; zeros(1, 2)];
+C_f_aug = C_f_aug;
+vs_eig_d = exp(vs_eig*T_s);
+L_V_d = place(F_aug', C_f_aug', vs_eig_d)';
+F_V =  F_aug - L_V_d*C_f_aug;
+G_V = G_aug;
+P_V_d = C_aug*pinv(C_f_aug);
+C_V_d = C_aug - P_V_d*C_f_aug;
+
+%save('Residual_generatorsQ2.mat');
+
+%sim('threeDiskOscillatorRig');
+
+%% Simulation for sensor fault (f_u = 0)
+
+
+f_m = [0;-0.025;0];     % Sensor fault vector (added to [y1;y2;y3])
+simTime = 45;                   % Simulation duration in seconds
+f_u_time = 25;                  % Actuator fault occurence time
+detect_time = f_u_time + 3.75;
+f_u = [0;0];                    % Actuator fault vector (added to [u1;u2])
+u_fault = 0;                    % Disable VA meachanism
+f_m_time = 8.5;                 % Sensor fault occurence time
+
+
+%% Plot settings
+% set(0,'DefaultTextInterpreter','latex');
+% set(0,'DefaultAxesFontSize',20);
+% set(0,'DefaultLineLineWidth', 2);
 
 %% Simulating without virtual actuator
 % Simulation for actuator fault (f_m = 0)
