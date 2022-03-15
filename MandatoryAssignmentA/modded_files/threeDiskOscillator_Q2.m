@@ -262,7 +262,6 @@ hold off
 figure
 hold on
 plot(H_GLR,'LineWidth',2)
-legend('$\mathbf{H}$', '$\mathbf{h}$','FontSize',16,'Interpreter','latex');
 xlabel('Time [sec]','FontName','times','FontSize',16,'Interpreter','latex')
 ylabel('$\mathbf{H}(h)$','FontName','times','FontSize',16,'Interpreter','latex')
 title('Hypothethis during GLR test');
