@@ -1,3 +1,4 @@
+%% initial parameters
 clear;
 close all;
 clc;
@@ -107,8 +108,6 @@ H = [H_yu H_yd;
 F = (simplify(null(H')'));
 V_ry = F(:,1:3)
 H_rf = vpa(simplify(V_ry*H_yf),4)
-%% Residual filter design
-
 %% Strong and weak detectability
 % All is denominated: [u1 u2 y1 y2 y3] -> [fa1 fa2 fa3 fa4 fa5]
 
@@ -217,32 +216,14 @@ M = ceil(double(vpasolve([integral == P_D], [M], [0 200])))
 
 r_window=zeros(M,1);
  
-
-% Density function expression
-% pd_zz = ( (1/2)*(zz/gg)^(-0.25) )* exp(-(zz + gg)/2)*besseli(-0.5, sqrt(gg*zz));
-% p_zz = int(pd_zz, zz,2*h, Inf);  % FILL IN - Integrate over the probability space
-% eq_1 = p_zz == P_D;  % FILL IN - Equation to be solved
-% lambda = double(vpasolve(eq_1, gg)); %1.2625
-% lambda=1.2625;
-%% Test lambda
-clc;
-% lambda = 0:0.1:100;
-% pTest = ncx2cdf(2*h, 1, lambda);
-% pTest2 = 1 - ncx2cdf(2*h, 1, lambda);
-for i = 1:100
-    pTest = ncx2cdf(2*h, 1, i*(mu_1^2)/(sigma_yr^2));
-    if pTest < P_M
-        M2 = i
-        break
-    end
-end
-% hold on
-% plot(lambda, pTest)
-% plot(lambda, pTest2)
-% disp(lambda)
-% M = lambda*sigma_yr^2/((mu_1 - mu_0)^2)
-% plot(lambda, M)
-
+% %% Test lambda
+% for i = 1:100
+%     pTest = ncx2cdf(2*h, 1, i*(mu_1^2)/(sigma_yr^2));
+%     if pTest < P_M
+%         M2 = i
+%         break
+%     end
+% end
 %% Q6
 
 load('Experiment\Second_run.mat');
@@ -266,15 +247,6 @@ xlabel('Time [sec]','FontName','times','FontSize',16,'Interpreter','latex')
 ylabel('$\mathbf{H}(h)$','FontName','times','FontSize',16,'Interpreter','latex')
 title('Hypothethis during GLR test');
 hold off
-
-
-
-%% Virtual actuator
-% Failure in actuator 2
-% Do the desing first in continuous time
-va_eig_d = [];  % Discrete time eigenvalues
-va_eig = log(va_eig_d)/T_s;     % Continuous time eigenvalues
-% Then discretise your VA
 
 %% DLQR
 B_change = [1 0;0 0];
@@ -408,19 +380,14 @@ x_0_aug = [x_0; 0];
 
 %% Simulation for sensor fault (f_u = 0)
 
-
 f_m = [0;-0.025;0];     % Sensor fault vector (added to [y1;y2;y3])
 simTime = 45;                   % Simulation duration in seconds
 f_u_time = 25;                  % Actuator fault occurence time
 f_u = [0;0];                    % Actuator fault vector (added to [u1;u2])
-u_fault = 0;                    % Enable VS meachanism
+u_fault = 0;                    % Disable VA mechanism
 f_m_time = 8.5;                 % Sensor fault occurence time
-% detect_time = f_m_time + 3.75;
 
-%% Plot settings
-% set(0,'DefaultTextInterpreter','latex');
-% set(0,'DefaultAxesFontSize',20);
-% set(0,'DefaultLineLineWidth', 2);
+% sim('threeDiskOscillatorRig_QBonus.slx')
 
 %% Simulating without virtual actuator
 % Simulation for actuator fault (f_m = 0)
@@ -457,7 +424,6 @@ hold off
 
 
 %% Residuals when actuator fault
-
 
 figure
 hold on
