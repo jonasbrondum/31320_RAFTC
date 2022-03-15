@@ -276,10 +276,8 @@ va_eig_d = [];  % Discrete time eigenvalues
 va_eig = log(va_eig_d)/T_s;     % Continuous time eigenvalues
 % Then discretise your VA
 
-B_change = [1 0;0 0];
-
 %% DLQR
-
+B_change = [1 0;0 0];
 
 Q_c = [2, 0, 0, 0, 0, 0;
        0, 0, 0, 0, 0, 0;
@@ -294,14 +292,6 @@ R_c =[10, 0;
 
 C_3 = [0 0 0 0 1 0];
 
-% State-feedback LQR design
-% Q_c = diag([2 0 2 0 2.5 0.0024]);
-% R_c = diag([10 10]);
-% K_c = [];
-
-% Scaling of reference
-% C_ref = [];
-
 % Kalman filter with friction estimation - DO NOT MODIFY
 F_aug = [F_d G_d(:,1);zeros(1,6) 1];
 G_aug = [G_d;0 0];
@@ -310,8 +300,6 @@ C_aug = [C zeros(3,1)];
 L_aug = dlqe(F_aug,eye(7),C_aug,1e-3*eye(7),deg2rad(0.0056)*eye(3));
 L_o = L_aug(1:6,:);
 L_d = L_aug(7,:);
-%% 
-
 
 C_ref=pinv(C_3*( eye(6)-F_d + G_d*K_c )^(-1) * G_d*K_c);
 
@@ -371,10 +359,6 @@ C_D = C;
 
 % Block diagram is implemented in threeDiskOscillatorRig_Q6.slx
 
-
-
-% sim('threeDiskOscillatorRig_solution');
-
 %% Virtual sensor
 dimA = max(size(A));
 E = zeros(dimA, 1);
@@ -401,7 +385,7 @@ else
     disp('Faulty system is not observable');
 end
 % Continuous time
-vs_eig = [-20 -41 -52 -45 -23 -25 -25];
+vs_eig = [eig(A); 2*min(real(eig(A)))];
 L_V = place(A_aug', C_f_aug', vs_eig)';
 A_V = A_aug - L_V*C_f_aug;
 B_V = B_aug;
@@ -420,9 +404,7 @@ G_V = G_aug;
 P_V_d = C_aug*pinv(C_f_aug);
 C_V_d = C_aug - P_V_d*C_f_aug;
 
-%save('Residual_generatorsQ2.mat');
-
-%sim('threeDiskOscillatorRig');
+x_0_aug = [x_0; 0];
 
 %% Simulation for sensor fault (f_u = 0)
 
@@ -430,11 +412,10 @@ C_V_d = C_aug - P_V_d*C_f_aug;
 f_m = [0;-0.025;0];     % Sensor fault vector (added to [y1;y2;y3])
 simTime = 45;                   % Simulation duration in seconds
 f_u_time = 25;                  % Actuator fault occurence time
-detect_time = f_u_time + 3.75;
 f_u = [0;0];                    % Actuator fault vector (added to [u1;u2])
-u_fault = 0;                    % Disable VA meachanism
+u_fault = 0;                    % Enable VS meachanism
 f_m_time = 8.5;                 % Sensor fault occurence time
-
+% detect_time = f_m_time + 3.75;
 
 %% Plot settings
 % set(0,'DefaultTextInterpreter','latex');
@@ -486,4 +467,16 @@ plot(RG3,'LineWidth',2)
 legend('RG1', 'RG2', 'RG3');
 xlabel('Time [sec]','FontName','times','FontSize',16,'Interpreter','latex')
 ylabel('$\mathbf{r}(t)$','FontName','times','FontSize',16,'Interpreter','latex')
+hold off
+
+
+%% With virtual sensor
+figure
+hold on
+plot(theta_ref,'LineWidth',2)
+plot(y_contr,'LineWidth',2)
+legend('$\mathbf{\theta_{ref}}$', '$\mathbf{\theta_{measured}}$','FontSize',16,'Interpreter','latex');
+xlabel('Time [sec]','FontName','times','FontSize',16,'Interpreter','latex')
+ylabel('$\mathbf{\theta}(t) [rad]$','FontName','times','FontSize',16,'Interpreter','latex')
+title('Virtual actuator performance');
 hold off
