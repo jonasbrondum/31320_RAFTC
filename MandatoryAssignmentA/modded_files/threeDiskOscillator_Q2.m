@@ -28,7 +28,7 @@ s = tf('s')
 sys = -s^2-(b_2*s-k_2-k_1)/J_2
 zeta=0.7;
 % Originally we chose omega = 10/4
-omega=10; % From experiment 28/02 -> omega = 20 was a good value
+omega=20; % From experiment 28/02 -> omega = 20 was a good value
 
 
 lowpass1=omega^2/(s^2+2*zeta*omega*s+omega^2)
