@@ -35,7 +35,7 @@ omega=20; % From experiment 28/02 -> omega = 20 was a good value
 lowpass1=omega^2/(s^2+2*zeta*omega*s+omega^2)
 
 
-%% Discretize
+%% Discretize Q2
 
 s = tf('s')
 
@@ -52,9 +52,12 @@ RG2 = J_3*c2d(lowpass1*F(2,:),T_s,'tustin')
 [num1 den1] = tfdata(RG1);
 [num2 den2] = tfdata(RG2);
 
-%residual 3
-RG3=c2d(lowpass1*F(1,4)/F(2,4),T_s,'tustin')
-[num3 den3] = tfdata(RG3);
+
+
+%% Q3
+
+
+
 
 %% State space representation
 % x = [theta1, omega1, theta2, omega2, theta3, omega3] = [x1 .. x6]
@@ -108,7 +111,7 @@ H = [H_yu H_yd;
 F = (simplify(null(H')'));
 V_ry = F(:,1:3)
 H_rf = vpa(simplify(V_ry*H_yf),4)
-%% Strong and weak detectability
+%% Strong and weak detectability Q4
 % All is denominated: [u1 u2 y1 y2 y3] -> [fa1 fa2 fa3 fa4 fa5]
 
 % Weak detectabilities:
@@ -332,64 +335,6 @@ C_D = C;
 
 % Block diagram is implemented in threeDiskOscillatorRig_Q6.slx
 
-%% Virtual sensor
-dimA = max(size(A));
-E = zeros(dimA, 1);
-E(2) = 1;
-A_aug = [A E;
-         zeros(1, dimA) 0];
-B_aug = [B; zeros(1, 2)];
-C_aug = [C zeros(3, 1)];
-rowC = max(size(x));
-colC = min(size(C));
-C_f = C;
-C_f(2,:) = zeros(1, rowC);
-C_f_aug = [C_f zeros(colC, 1)];
-
-if rank(C_f_aug) == rank([C_aug; C_f_aug])
-    disp('Perfect static matching for sensor fault');
-else
-    disp('Imperfect static matching for sensor fault');
-end
-
-if max(size(A_aug)) == rank(obsv(A_aug, C_f_aug)')
-    disp('Faulty system is observable');
-else
-    disp('Faulty system is not observable');
-end
-% Continuous time
-vs_eig = [eig(A); 2*min(real(eig(A)))];
-L_V = place(A_aug', C_f_aug', vs_eig)';
-A_V = A_aug - L_V*C_f_aug;
-B_V = B_aug;
-P_V = C_aug*pinv(C_f_aug);
-C_V = C_aug - P_V*C_f_aug;
-
-% Discrete time
-F_aug = [F_d E;
-         zeros(1, dimA) 1];
-G_aug = [G_d; zeros(1, 2)];
-C_f_aug = C_f_aug;
-vs_eig_d = exp(vs_eig*T_s);
-L_V_d = place(F_aug', C_f_aug', vs_eig_d)';
-F_V =  F_aug - L_V_d*C_f_aug;
-G_V = G_aug;
-P_V_d = C_aug*pinv(C_f_aug);
-C_V_d = C_aug - P_V_d*C_f_aug;
-
-x_0_aug = [x_0; 0];
-
-%% Simulation for sensor fault (f_u = 0)
-
-f_m = [0;-0.025;0];     % Sensor fault vector (added to [y1;y2;y3])
-simTime = 45;                   % Simulation duration in seconds
-f_u_time = 25;                  % Actuator fault occurence time
-f_u = [0;0];                    % Actuator fault vector (added to [u1;u2])
-u_fault = 0;                    % Disable VA mechanism
-f_m_time = 8.5;                 % Sensor fault occurence time
-
-% sim('threeDiskOscillatorRig_QBonus.slx')
-
 %% Simulating without virtual actuator
 % Simulation for actuator fault (f_m = 0)
 f_u = [0;-0.1];                 % Actuator fault vector (added to [u1;u2])
@@ -437,6 +382,67 @@ legend('RG1', 'RG2', 'RG3');
 xlabel('Time [sec]','FontName','times','FontSize',16,'Interpreter','latex')
 ylabel('$\mathbf{r}(t)$','FontName','times','FontSize',16,'Interpreter','latex')
 hold off
+%% Bonus question!!
+
+
+%% Virtual sensor
+dimA = max(size(A));
+E = zeros(dimA, 1);
+E(2) = 1;
+A_aug = [A E;
+         zeros(1, dimA) 0];
+B_aug = [B; zeros(1, 2)];
+C_aug = [C zeros(3, 1)];
+rowC = max(size(x));
+colC = min(size(C));
+C_f = C;
+C_f(2,:) = zeros(1, rowC);
+C_f_aug = [C_f zeros(colC, 1)];
+
+if rank(C_f_aug) == rank([C_aug; C_f_aug])
+    disp('Perfect static matching for sensor fault');
+else
+    disp('Imperfect static matching for sensor fault');
+end
+
+if max(size(A_aug)) == rank(obsv(A_aug, C_f_aug)')
+    disp('Faulty system is observable');
+else
+    disp('Faulty system is not observable');
+end
+% Continuous time
+vs_eig = [eig(A); 2*min(real(eig(A)))];
+L_V = place(A_aug', C_f_aug', vs_eig)';
+A_V = A_aug - L_V*C_f_aug;
+B_V = B_aug;
+P_V = C_aug*pinv(C_f_aug);
+C_V = C_aug - P_V*C_f_aug;
+
+% Discrete time
+F_aug = [F_d E;
+         zeros(1, dimA) 1];
+G_aug = [G_d; zeros(1, 2)];
+C_f_aug = C_f_aug;
+vs_eig_d = exp(vs_eig*T_s);
+L_V_d = place(F_aug', C_f_aug', vs_eig_d)';
+F_V =  F_aug - L_V_d*C_f_aug;
+G_V = G_aug;
+P_V_d = C_aug*pinv(C_f_aug);
+C_V_d = C_aug - P_V_d*C_f_aug;
+
+x_0_aug = [x_0; 0];
+
+
+
+
+f_m = [0;-0.025;0];     % Sensor fault vector (added to [y1;y2;y3])
+simTime = 45;                   % Simulation duration in seconds
+f_u_time = 25;                  % Actuator fault occurence time
+f_u = [0;0];                    % Actuator fault vector (added to [u1;u2])
+u_fault = 0;                    % Disable VA mechanism
+f_m_time = 8.5;                 % Sensor fault occurence time
+
+sim('threeDiskOscillatorRig_QBonus.slx')
 
 
 %% With virtual sensor
@@ -447,5 +453,5 @@ plot(y_contr,'LineWidth',2)
 legend('$\mathbf{\theta_{ref}}$', '$\mathbf{\theta_{measured}}$','FontSize',16,'Interpreter','latex');
 xlabel('Time [sec]','FontName','times','FontSize',16,'Interpreter','latex')
 ylabel('$\mathbf{\theta}(t) [rad]$','FontName','times','FontSize',16,'Interpreter','latex')
-title('Virtual actuator performance');
+title('Virtual sensor performance');
 hold off
