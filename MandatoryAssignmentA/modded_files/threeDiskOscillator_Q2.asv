@@ -241,6 +241,35 @@ end
 % disp(lambda)
 % M = lambda*sigma_yr^2/((mu_1 - mu_0)^2)
 % plot(lambda, M)
+
+%% Q6
+
+load('Experiment\Second_run.mat');
+load('Experiment\First_run.mat');
+
+
+figure
+hold on
+plot(g_GLR,'LineWidth',2)
+plot(h_GLR,'LineWidth',2)
+legend('$\mathbf{g}(h)$', '$\mathbf{h}$','FontSize',16,'Interpreter','latex');
+xlabel('Time [sec]','FontName','times','FontSize',16,'Interpreter','latex')
+ylabel('$\mathbf{g}(h)$','FontName','times','FontSize',16,'Interpreter','latex')
+title('GLR test during sensor fault');
+hold off
+
+%% 
+
+figure
+hold on
+plot(H_GLR,'LineWidth',2)
+xlabel('Time [sec]','FontName','times','FontSize',16,'Interpreter','latex')
+ylabel('$\mathbf{H}(h)$','FontName','times','FontSize',16,'Interpreter','latex')
+title('Hypothethis during GLR test');
+hold off
+
+
+
 %% Virtual actuator
 % Failure in actuator 2
 % Do the desing first in continuous time
@@ -368,25 +397,49 @@ C_D = C;
 
 % sim('threeDiskOscillatorRig_solution');
 
-%% Simulating
+%% Simulating without virtual actuator
+% Simulation for actuator fault (f_m = 0)
+f_u = [0;-0.1];                 % Actuator fault vector (added to [u1;u2])
+u_fault = 0;                    % Enable VA meachanism
+f_m = [0;0;0];                  % Sensor fault vector (added to [y1;y2;y3])
+detect_time=45;
 
+figure
+hold on
+plot(theta_ref,'LineWidth',2)
+plot(y_contr,'LineWidth',2)
+legend('$\mathbf{\theta_{ref}}$', '$\mathbf{\theta_{measured}}$','FontSize',16,'Interpreter','latex');
+xlabel('Time [sec]','FontName','times','FontSize',16,'Interpreter','latex')
+ylabel('$\mathbf{\theta}(t) [rad]$','FontName','times','FontSize',16,'Interpreter','latex')
+title('LQR controller actuator fault');
+hold off
+%% With virtual actuator
+% Simulation for actuator fault (f_m = 0)
+f_u = [0;-0.1];                 % Actuator fault vector (added to [u1;u2])
+u_fault = 1;                    % Enable VA meachanism
+f_m = [0;0;0];                  % Sensor fault vector (added to [y1;y2;y3])
+detect_time = f_u_time + 3.75;
+
+figure
+hold on
+plot(theta_ref,'LineWidth',2)
+plot(y_contr,'LineWidth',2)
+legend('$\mathbf{\theta_{ref}}$', '$\mathbf{\theta_{measured}}$','FontSize',16,'Interpreter','latex');
+xlabel('Time [sec]','FontName','times','FontSize',16,'Interpreter','latex')
+ylabel('$\mathbf{\theta}(t) [rad]$','FontName','times','FontSize',16,'Interpreter','latex')
+title('Virtual actuator performance');
+hold off
+
+
+%% Residuals when actuator fault
 
 
 figure
 hold on
-plot(r(:,1),r3,'LineWidth',2)
-plot(r(:,1),r(:,2),'LineWidth',2)
-plot(r(:,1),r(:,3),'LineWidth',2)
-legend('RG3', 'RG1', 'RG2');
+plot(RG1,'LineWidth',2)
+plot(RG2,'LineWidth',2)
+plot(RG3,'LineWidth',2)
+legend('RG1', 'RG2', 'RG3');
 xlabel('Time [sec]','FontName','times','FontSize',16,'Interpreter','latex')
 ylabel('$\mathbf{r}(t)$','FontName','times','FontSize',16,'Interpreter','latex')
-set(l,'FontName','times','FontSize',16,'Interpreter','latex');
 hold off
-
-
-%Residual 3
-
-
-
-
-

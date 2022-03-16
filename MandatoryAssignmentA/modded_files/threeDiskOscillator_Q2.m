@@ -28,7 +28,7 @@ s = tf('s')
 sys = -s^2-(b_2*s-k_2-k_1)/J_2
 zeta=0.7;
 % Originally we chose omega = 10/4
-omega=10; % From experiment 28/02 -> omega = 20 was a good value
+omega=20; % From experiment 28/02 -> omega = 20 was a good value
 
 
 lowpass1=omega^2/(s^2+2*zeta*omega*s+omega^2)
@@ -246,6 +246,7 @@ end
 
 load('Experiment\Second_run.mat');
 
+
 figure
 hold on
 plot(g_GLR,'LineWidth',2)
@@ -416,6 +417,8 @@ hold off
 f_u = [0;-0.1];                 % Actuator fault vector (added to [u1;u2])
 u_fault = 1;                    % Enable VA meachanism
 f_m = [0;0;0];                  % Sensor fault vector (added to [y1;y2;y3])
+f_u_time = 25;                  % Actuator fault occurence time
+detect_time = f_u_time + 3.75;
 detect_time = f_u_time + 3.75;
 
 figure
