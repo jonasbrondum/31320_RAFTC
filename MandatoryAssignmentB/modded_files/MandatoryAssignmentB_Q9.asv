@@ -136,12 +136,11 @@ blksys = append(G,W1,W3,K);
 S1 = sumblk('ug = yK',1);
 S2 = sumblk('y = yg',1);
 S3 = sumblk('uW1 = e',1);
-S4 = sumblk('uK = e',1);
-S5 = sumblk('z1 = yW1',1); 
+S4 = sumblk('uK= e',1);
+S5 = sumblk('zp = yW1',1); 
 S6 = sumblk('e = r - yg',1);
-S7 = sumblk('uW3 = yK', 1);
-S8 = sumblk('z3 = yW3',1);
-S = append(S1,S2,S3,S4,S5,S6,S7,S8);
+S7 = sumblk('')
+S = append(S1,S2,S3,S4,S5,S6);
  
 
 
@@ -149,22 +148,19 @@ S = append(S1,S2,S3,S4,S5,S6,S7,S8);
 % P    = [Wp , Wp*G, Wp*G;
 %         0  , 0   , Wu;
 %         I  , G   , G];
-Pcl  = connect(blksys,S,{'r'},{'y','z1','z3','e'});
+Pcl  = connect(blksys,S,{'r'},{'y','zp','e'});
 
-Gcl = feedback(K*G,1);
+Gcl = feedback(Ks*G,1);
 % validate: 
-figure ,bode(Pcl('y','r'), (G*K)/(1+G*K),'--r')
-disp ('validate that G*K/(1+G*K) == transfer function from ref to y')
-figure ,bode(Pcl('z1','r'), W1/(1+G*K),'--r')
-disp ('validate that W1/(1+G*K) == transfer function from ref to z1')
-figure ,bode(Pcl('z3','r'), W3/(1+G*K),'--r')
-disp ('validate that W3/(1+G*K) == transfer function from ref to z3')
-figure ,bode(Pcl('e','r'), 1/(1+G*K),'--r')
-disp ('validate that 1/(1+G*K) == transfer function from ref to e')
+figure ,bode(Pcl('y','r'), (G*Ks)/(1+G*Ks),'--r')
+disp ('validate that G*Ks/(1+G*Ks) == transfer function from ref to y')
+figure ,bode(Pcl('zp','r'), Wp/(1+G*Ks),'--r')
+disp ('validate that Wp/(1+G*Ks) == transfer function from ref to zp')
+figure ,bode(Pcl('e','r'), 1/(1+G*Ks),'--r')
+disp ('validate that 1/(1+G*Ks) == transfer function from ref to e')
 
 % Controller assumes positive feedback
 
 hinfnorm(Pcl('y','r'))
-hinfnorm(Pcl('z1','r'))
-hinfnorm(Pcl('z3','r'))
+hinfnorm(Pcl('zp','r'))
 hinfnorm(Pcl('e','r'))
