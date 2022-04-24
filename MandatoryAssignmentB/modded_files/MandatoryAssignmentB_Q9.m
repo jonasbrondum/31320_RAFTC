@@ -48,11 +48,10 @@ E_y = double(jacobian(g, d));
 [num, den] = ss2tf(A,B,C,D,1);
 
 % Top disk is y3 which is theta_3:
+% SISO system from state-space
 system = tf(num(3,:),den)
 
-bode(system)
-
-[K, CL, gamma] = hinfsyn(system, 1, 1)
+% First we need to make some weights relevant as 
 
 %% Test of implementation:
 % Augmented plant for synthesis
