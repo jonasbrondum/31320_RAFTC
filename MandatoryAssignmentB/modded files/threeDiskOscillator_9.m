@@ -54,14 +54,31 @@ sys_d = c2d(ss(A, B, C, D), T_s);
 F_d = sys_d.A;
 G_d = sys_d.B;
 
+
+
+
+%% Get transfer func from simulink
+mdl = 'transfer';
+load_system(mdl);
+io(1) = linio('transfer/Sum',1,'input');
+io(2) = linio('transfer/Sum1',1,'output');
+linsys1 = linearize(mdl,io); 
+sys = tf(linsys1)
+bode(sys)
+
+
+
+
 %% 
+
+G = ss(A, B, C, D);
 
 Wl = makeweight(10,30,0.01);
 
 W3 = makeweight(0.01,30,10);
 
-bodemag(Wl,Wh)
-legend
+bodemag(Wl,W3)
+legend 
 grid on
 
 
@@ -84,6 +101,14 @@ legend('S','W1','T','W3')
 
 
 [num,den]=ss2tf(CL,1)
+
+
+%% Weights 2 simulink
+x_0 = [0;0;0;0;0;0];            % Initial conditions
+T_s = 0.004;                    % Sampling period
+[numW1 denW1] = tfdata(W1);
+[num2 den2] = tfdata(RG2);
+
 
 
 %% 
