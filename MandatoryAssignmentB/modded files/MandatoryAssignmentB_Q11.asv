@@ -19,6 +19,7 @@ T_Cp = ECP_values(12);          % Disk 1 Coulomb friction in positive direction
 T_Cm = ECP_values(13);          % Disk 1 Coulomb friction in negative direction
 atan_scale = 100;               % Sign approximation factor
 w_th = 0.75;                    % Threshold angular velocity rad/s
+T_s = 0.004;                    % Sampling period
 
 %% State space representation
 % x = [theta1, omega1, theta2, omega2, theta3, omega3] = [x1 .. x6]
@@ -44,12 +45,15 @@ D = double(jacobian(g, u));
 E_x = double(jacobian(f, d));
 E_y = double(jacobian(g, d));
 
+
 %% SISO system from input to top disk
 [num, den] = ss2tf(A,B,C,D,1);
 
 % Top disk is y3 which is theta_3:
 % SISO system from state-space
 G = tf(num(3,:),den);
+
+%%
 
 % First we need to make some weights relevant as to the design
 % requirements:
@@ -59,11 +63,22 @@ G = tf(num(3,:),den);
 % We want (almost) integral action meaning (almost) no steady state error
 % We don't want the actuator to go into saturation for a step-response
 
-W1 = makeweight(25, 10, 0.01);
+%W1 = makeweight(25, 10, 0.01);
 
-W2 = tf(0.1,1);
-[A,B,C,D] = tf2ss(W2.Numerator{1},W2.Denominator{1});
-W2ss = ss(A,B,C,D);
+W1 = makeweight(25, 35, 0.01);
+
+
+W2 = tf(0.1,1); %W2 needed to be 10 times smaller than our initial guess for the controller to work in simulink.
+
+W2ss = makeweight(0.01, 30, 100);
+
+%[A,B,C,D] = tf2ss(W2.Numerator{1},W2.Denominator{1});
+%W2ss = ss(A,B,C,D);
+
+%W2 = tf(0.05,1); %W2 needed to be 10 times smaller than our initial guess for the controller to work in simulink.
+%[A,B,C,D] = tf2ss(W2.Numerator{1},W2.Denominator{1});
+%W2ss = ss(A,B,C,D);
+
 
 % bodemag(W1,W3)
 % yline(0,'--');
@@ -71,7 +86,7 @@ W2ss = ss(A,B,C,D);
 % grid on
 
 %[K,CL,gamma] = mixsyn(G,W1,W2ss,[]);
-[K,CL,gamma] = mixsyn(G,W1,W2ss,[], 1);
+[K,CL,gamma] = mixsyn(G,W1,W2ss,[], 1); %Last argument makes the function try to force gamma to 1
 % [K,CL,gamma] = mixsyn(G,W1,[],[]);
 gamma
 
@@ -176,8 +191,17 @@ hinfnorm(Pcl('z2','r'))
 hinfnorm(Pcl('e','r'))
 
 figure;
-step(Pcl)
+step((Pcl))
+figure;
+
+step(c2d(Pcl,T_s))
+
+
 %% Simulation in Simulink
+%Simulink outputs very different results from Henriks method. This is
+%probably due to his system being continous, while the simulink model is
+%discrete
+
 
 [numK, denK]=ss2tf(K.A, K.B, K.C, K.D,1)
 
@@ -192,15 +216,17 @@ x_0 = [0;0;0;0;0;0];            % Initial conditions
 T_s = 0.004;                    % Sampling period
 %[numW1 denW1] = (tfdata(W1));
 
-numW1=cell2mat(numW1)
-denW1=cell2mat(denW1)
+%numW1=cell2mat(numW1)nu
+%denW1=cell2mat(denW1)
 
 
-W2 = tf(0.1,1);
+%W2 = tf(0.1,1);
 
-[numW2 denW2] = cell2mat(tfdata(W2));
+%[numW2 denW2] = cell2mat(tfdata(W2));
 
-[numKtf denKtf] = tfdata(Ktf);
+%[numKtf denKtf] = tfdata(Ktf);
+
+
 
 
 

@@ -44,12 +44,15 @@ D = double(jacobian(g, u));
 E_x = double(jacobian(f, d));
 E_y = double(jacobian(g, d));
 
+
 %% SISO system from input to top disk
 [num, den] = ss2tf(A,B,C,D,1);
 
 % Top disk is y3 which is theta_3:
 % SISO system from state-space
 G = tf(num(3,:),den);
+
+%%
 
 % First we need to make some weights relevant as to the design
 % requirements:
@@ -71,7 +74,7 @@ W2ss = ss(A,B,C,D);
 % grid on
 
 %[K,CL,gamma] = mixsyn(G,W1,W2ss,[]);
-[K,CL,gamma] = mixsyn(G,W1,W2ss,[], 1);
+[K,CL,gamma] = mixsyn(G,W1,W2ss,[], 1); %Last argument makes the function try to force gamma to 1
 % [K,CL,gamma] = mixsyn(G,W1,[],[]);
 gamma
 
@@ -179,16 +182,28 @@ figure;
 step(Pcl)
 %% Simulation in Simulink
 
-Ktf=ss2tf(K.A, K.B, K.C, K.D)
+[numK, denK]=ss2tf(K.A, K.B, K.C, K.D,1)
+
+[numW1, denW1]=ss2tf(W1.A, W1.B, W1.C, W1.D,1)
+
+
+[numW2, denW2]=ss2tf(W2ss.A, W2ss.B, W2ss.C, W2ss.D,1)
+
+
 
 x_0 = [0;0;0;0;0;0];            % Initial conditions
 T_s = 0.004;                    % Sampling period
-[numW1 denW1] = tfdata(W1);
-W2 = tf(0.1,1);
+%[numW1 denW1] = (tfdata(W1));
 
-[numW2 denW2] = tfdata(W2);
+%numW1=cell2mat(numW1)
+%denW1=cell2mat(denW1)
 
-[numKtf denKtf] = tfdata(Ktf);
+
+%W2 = tf(0.1,1);
+
+%[numW2 denW2] = cell2mat(tfdata(W2));
+
+%[numKtf denKtf] = tfdata(Ktf);
 
 
 
