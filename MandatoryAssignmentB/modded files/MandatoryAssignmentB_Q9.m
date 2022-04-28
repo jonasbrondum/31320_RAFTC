@@ -89,11 +89,11 @@ T= I-S;
 close all;
 
 figure;
-sigma(S,'b',W1,'b--',T,'r',W2,'r--',{0.1,1000})
+sigma(S,'b',W1,'b--',T,'r',W2,'r--',{0.01,1000})
 legend('S','W1','T','W3')
 
 figure;
-sigma(L,'b',W1,'r--',1/W2,'g--',{0.1,1000})
+sigma(L,'b',W1,'r--',1/W2,'g--',{0.01,1000})
 legend('L','W1','1/W2')
 
 %% Test of implementation:
