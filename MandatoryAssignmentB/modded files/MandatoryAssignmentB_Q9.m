@@ -110,21 +110,6 @@ legend('L','W1','1/W2')
 %          |                                    |
 %          +------------------------------------+
 %                  
-%
-% UNFINISHED:
-% [A,B,C,D] = tf2ss(k,[Is 0 0]);
-% G = ss(A,B,C,D);
-% Ks = Kc*((s+tau1)/s)*((tau2*s+1)/(tau3*s+1));
-% 
-% M = 2;
-% A = 0.01;
-% wb = pi/5;
-% W_p = (s/M + wb)/(s + wb*A) ;% Choose "control sensitivity weight" as highpass filter
-% [Awp,Bwp,Cwp,Dwp] = ssdata(W_p);
-% Wp = ss(Awp,Bwp,Cwp,Dwp);
-
-%ny = 2;
-%nu = 2;
 
 G.InputName = 'ug';
 G.OutputName= 'yg';
@@ -149,10 +134,8 @@ S5 = sumblk('z1 = yW1',1);
 S6 = sumblk('e = r - yg',1);
 S7 = sumblk('uW2 = yK', 1);
 S8 = sumblk('z2 = yW2',1);
-S9 = sumblk('u = yK',1);
+S9 = sumblk('u = yK',1); % Just so we can have u as an output for the step.
 S = append(S1,S2,S3,S4,S5,S6,S7,S8,S9);
- 
-
 
  % connect to obtain generalised plant
 % P    = [Wp , Wp*G, Wp*G;
@@ -161,52 +144,3 @@ S = append(S1,S2,S3,S4,S5,S6,S7,S8,S9);
 Pcl  = connect(blksys,S,{'r'},{'y','z1','z2','e','u'});
 
 Gcl = feedback(K*G,1);
-% validate: 
-figure ,bode(Pcl('y','r'), (G*K)/(1+G*K),'--r',{0.1,1000})
-disp ('validate that G*K/(1+G*K) == transfer function from ref to y')
-figure ,bode(Pcl('z1','r'), W1/(1+G*K),'--r',{0.1,1000})
-disp ('validate that W1/(1+G*K) == transfer function from ref to z1')
-figure ,bode(Pcl('z2','r'), W2/(1+G*K),'--r',{0.1,1000})
-disp ('validate that W2/(1+G*K) == transfer function from ref to z2')
-figure ,bode(Pcl('e','r'), 1/(1+G*K),'--r',{0.1,1000})
-disp ('validate that 1/(1+G*K) == transfer function from ref to e')
-
-% Controller assumes positive feedback
-
-hinfnorm(Pcl('y','r'))
-hinfnorm(Pcl('z1','r'))
-hinfnorm(Pcl('z2','r'))
-hinfnorm(Pcl('e','r'))
-
-figure;
-step(Pcl)
-%% Simulation in Simulink
-
-[numK, denK]=ss2tf(K.A, K.B, K.C, K.D,1)
-
-[numW1, denW1]=ss2tf(W1.A, W1.B, W1.C, W1.D,1)
-
-
-[numW2, denW2]=ss2tf(W2ss.A, W2ss.B, W2ss.C, W2ss.D,1)
-
-
-
-x_0 = [0;0;0;0;0;0];            % Initial conditions
-T_s = 0.004;                    % Sampling period
-%[numW1 denW1] = (tfdata(W1));
-
-%numW1=cell2mat(numW1)
-%denW1=cell2mat(denW1)
-
-
-%W2 = tf(0.1,1);
-
-%[numW2 denW2] = cell2mat(tfdata(W2));
-
-%[numKtf denKtf] = tfdata(Ktf);
-
-
-
-
-
-

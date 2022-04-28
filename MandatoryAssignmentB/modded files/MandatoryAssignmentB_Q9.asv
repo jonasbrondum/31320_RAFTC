@@ -44,12 +44,15 @@ D = double(jacobian(g, u));
 E_x = double(jacobian(f, d));
 E_y = double(jacobian(g, d));
 
+
 %% SISO system from input to top disk
 [num, den] = ss2tf(A,B,C,D,1);
 
 % Top disk is y3 which is theta_3:
 % SISO system from state-space
 G = tf(num(3,:),den);
+
+%%
 
 % First we need to make some weights relevant as to the design
 % requirements:
@@ -59,15 +62,20 @@ G = tf(num(3,:),den);
 % We want (almost) integral action meaning (almost) no steady state error
 % We don't want the actuator to go into saturation for a step-response
 
-W1 = makeweight(10, 20, 0.5)
-W3 = makeweight(0.8, 25, 20)
+W1 = makeweight(25, 10, 0.01);
+
+W2 = tf(0.1,1);
+[A,B,C,D] = tf2ss(W2.Numerator{1},W2.Denominator{1});
+W2ss = ss(A,B,C,D);
 
 % bodemag(W1,W3)
 % yline(0,'--');
 % legend('W1','W3','0 dB')
 % grid on
 
-[K,CL,gamma] = mixsyn(G,W1,[],W3);
+%[K,CL,gamma] = mixsyn(G,W1,W2ss,[]);
+[K,CL,gamma] = mixsyn(G,W1,W2ss,[], 1); %Last argument makes the function try to force gamma to 1
+% [K,CL,gamma] = mixsyn(G,W1,[],[]);
 gamma
 
 % First, compare the resulting sensitivity S and complementary sensitivity 
@@ -81,12 +89,12 @@ T= I-S;
 close all;
 
 figure;
-sigma(S,'b',W1,'b--',T,'r',W3,'r--',{0.1,1000})
+sigma(S,'b',W1,'b--',T,'r',W2,'r--',{0.1,1000})
 legend('S','W1','T','W3')
 
 figure;
-sigma(L,'b',W1,'r--',1/W3,'g--',{0.1,1000})
-legend('L','W1','1/W3')
+sigma(L,'b',W1,'r--',1/W2,'g--',{0.1,1000})
+legend('L','W1','1/W2')
 
 %% Test of implementation:
 % Augmented plant for synthesis
@@ -94,7 +102,7 @@ legend('L','W1','1/W3')
 %            +--------------------------|W_1(s)|----> z1
 %            |                          +------+
 %            |                        +------+
-%            |                 +------|W_3(s)|------> z3
+%            |                 +------|W_2(s)|------> z2
 %            |                 |      +------+
 %         +  | e +------+  u(s)| +------+             
 % ref ---->O-----| K(s) |--------| G(s) |-----------> y
@@ -103,20 +111,6 @@ legend('L','W1','1/W3')
 %          +------------------------------------+
 %                  
 %
-% UNFINISHED:
-% [A,B,C,D] = tf2ss(k,[Is 0 0]);
-% G = ss(A,B,C,D);
-% Ks = Kc*((s+tau1)/s)*((tau2*s+1)/(tau3*s+1));
-% 
-% M = 2;
-% A = 0.01;
-% wb = pi/5;
-% W_p = (s/M + wb)/(s + wb*A) ;% Choose "control sensitivity weight" as highpass filter
-% [Awp,Bwp,Cwp,Dwp] = ssdata(W_p);
-% Wp = ss(Awp,Bwp,Cwp,Dwp);
-
-%ny = 2;
-%nu = 2;
 
 G.InputName = 'ug';
 G.OutputName= 'yg';
@@ -124,13 +118,13 @@ G.OutputName= 'yg';
 W1.InputName = 'uW1';
 W1.OutputName = 'yW1';
 
-W3.InputName = 'uW3';
-W3.OutputName = 'yW3';
+W2.InputName = 'uW2';
+W2.OutputName = 'yW2';
 
 K.InputName = 'uK';
 K.OutputName = 'yK';
 
-blksys = append(G,W1,W3,K);
+blksys = append(G,W1,W2,K);
 
 % specify connections
 S1 = sumblk('ug = yK',1);
@@ -139,32 +133,15 @@ S3 = sumblk('uW1 = e',1);
 S4 = sumblk('uK = e',1);
 S5 = sumblk('z1 = yW1',1); 
 S6 = sumblk('e = r - yg',1);
-S7 = sumblk('uW3 = yK', 1);
-S8 = sumblk('z3 = yW3',1);
-S = append(S1,S2,S3,S4,S5,S6,S7,S8);
- 
-
+S7 = sumblk('uW2 = yK', 1);
+S8 = sumblk('z2 = yW2',1);
+S9 = sumblk('u = yK',1); % Just so we can have u as an p
+S = append(S1,S2,S3,S4,S5,S6,S7,S8,S9);
 
  % connect to obtain generalised plant
 % P    = [Wp , Wp*G, Wp*G;
 %         0  , 0   , Wu;
 %         I  , G   , G];
-Pcl  = connect(blksys,S,{'r'},{'y','z1','z3','e'});
+Pcl  = connect(blksys,S,{'r'},{'y','z1','z2','e','u'});
 
 Gcl = feedback(K*G,1);
-% validate: 
-figure ,bode(Pcl('y','r'), (G*K)/(1+G*K),'--r')
-disp ('validate that G*K/(1+G*K) == transfer function from ref to y')
-figure ,bode(Pcl('z1','r'), W1/(1+G*K),'--r')
-disp ('validate that W1/(1+G*K) == transfer function from ref to z1')
-figure ,bode(Pcl('z3','r'), W3/(1+G*K),'--r')
-disp ('validate that W3/(1+G*K) == transfer function from ref to z3')
-figure ,bode(Pcl('e','r'), 1/(1+G*K),'--r')
-disp ('validate that 1/(1+G*K) == transfer function from ref to e')
-
-% Controller assumes positive feedback
-
-hinfnorm(Pcl('y','r'))
-hinfnorm(Pcl('z1','r'))
-hinfnorm(Pcl('z3','r'))
-hinfnorm(Pcl('e','r'))
