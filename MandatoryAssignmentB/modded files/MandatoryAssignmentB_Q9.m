@@ -223,17 +223,15 @@ T_s = 0.0004;                    % Sampling period
 
 %[numKtf denKtf] = tfdata(Ktf);
 
-
-
-
-%% Example from book
-% Uses the Robust Control toolbox
-%G=tf(200,conv([10 1],conv([0.05 1],[0.05 1]))); % Plant is G.
-M=1.5; wb=10; A=1.e-4;
-Wp = tf([1/M wb], [1 wb*A]); Wu = 1; % Weights.
-% Find H-infinity optimal controller:
-[khinf,ghinf,gopt] = mixsyn(G,Wp,Wu,[]);
-Marg = allmargin(G*khinf) % Gain and phase margins
+% 
+% %% Example from book
+% % Uses the Robust Control toolbox
+% %G=tf(200,conv([10 1],conv([0.05 1],[0.05 1]))); % Plant is G.
+% M=1.5; wb=10; A=1.e-4;
+% Wp = tf([1/M wb], [1 wb*A]); Wu = 1; % Weights.
+% % Find H-infinity optimal controller:
+% [khinf,ghinf,gopt] = mixsyn(G,Wp,Wu,[]);
+% Marg = allmargin(G*khinf) % Gain and phase margins
 
 
 
