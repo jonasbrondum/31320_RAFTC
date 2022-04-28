@@ -67,20 +67,22 @@ T_s = 0.004;                    % Sampling period
 
 % Example from book
 % Uses the Robust Control toolbox
-M=0.2; wb=32; A=1.e-4;
+M=2; wb=10; A=1.e-4;
 W1 = tf([1/M wb], [1 wb*A]);
+
 
 [A,B,C,D] = tf2ss(W1.Numerator{1},W1.Denominator{1});
 
 W1 = ss(A,B,C,D);
+%W1= makeweight(20,35,0.1)
 
-W2=tf(1,1)
+W2=tf(0.01,1)
 [A,B,C,D] = tf2ss(W2.Numerator{1},W2.Denominator{1});
 
 W2ss = ss(A,B,C,D);
 
 
-[K,CL,gamma] = mixsyn(G,W1,W2ss,[], 20); %Last argument makes the function try to force gamma to 1
+[K,CL,gamma] = mixsyn(G,W1,W2ss,[], 1); %Last argument makes the function try to force gamma to 1
 % [K,CL,gamma] = mixsyn(G,W1,[],[]);
 gamma
 
