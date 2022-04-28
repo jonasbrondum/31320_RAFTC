@@ -63,13 +63,6 @@ G = tf(num(3,:),den);
 % We want (almost) integral action meaning (almost) no steady state error
 % We don't want the actuator to go into saturation for a step-response
 
-%W1 = makeweight(25, 10, 0.01);
-
-
-
-W1 = makeweight(25, 35, 0.01);
-
-
 W2 = tf(1,1); %W2 needed to be 10 times smaller than our initial guess for the controller to work in simulink.
 
 
@@ -77,28 +70,15 @@ W2 = tf(1,1); %W2 needed to be 10 times smaller than our initial guess for the c
 %It seems like we get slight integral action with W2ss being an actual
 %weight function. But only in continous time, and only after 10^6 seconds.
 %So not very reliable...
-%W2ss = makeweight(0.01, 40, 25);
 
 [A,B,C,D] = tf2ss(W2.Numerator{1},W2.Denominator{1});
 W2ss = ss(A,B,C,D);
+%W2ss = makeweight(0.01, 32, 25);
 
-%W2 = tf(0.05,1); %W2 needed to be 10 times smaller than our initial guess for the controller to work in simulink.
-%[A,B,C,D] = tf2ss(W2.Numerator{1},W2.Denominator{1});
-%W2ss = ss(A,B,C,D);
-
-
-% bodemag(W1,W3)
-% yline(0,'--');
-% legend('W1','W3','0 dB')
-% grid on
-
-%[K,CL,gamma] = mixsyn(G,W1,W2ss,[]);
-
-%W3=makeweight(0.01, 35, 25);
 
 % Example from book
 % Uses the Robust Control toolbox
-M=0.2; wb=20; A=1.e-10;
+M=0.2; wb=32; A=1.e-4;
 W1 = tf([1/M wb], [1 wb*A]);
 
 [A,B,C,D] = tf2ss(W1.Numerator{1},W1.Denominator{1});
@@ -236,7 +216,7 @@ step(c2d(Pcl,T_s))
 
 
 x_0 = [0;0;0;0;0;0];            % Initial conditions
-T_s = 0.004;                    % Sampling period
+T_s = 0.0004;                    % Sampling period
 %[numW1 denW1] = (tfdata(W1));
 
 %numW1=cell2mat(numW1)
