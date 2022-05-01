@@ -61,13 +61,13 @@ T_s = 0.004;                    % Sampling period
 % requirements:
 
 % We want gamma ~= 1
-% And we don't want to high gains
+% And we don't want too high gains
 % We want (almost) integral action meaning (almost) no steady state error
 % We don't want the actuator to go into saturation for a step-response
 
 % Example from book
 % Uses the Robust Control toolbox
-M=2; wb=10; A=1.e-4;
+M=2; wb=10; A=1.e-4; % Hvad betyder disse og hvor i bogen kommer de fra?
 W1 = tf([1/M wb], [1 wb*A]);
 
 
@@ -79,10 +79,10 @@ W1 = ss(A,B,C,D);
 W2=tf(0.01,1)
 [A,B,C,D] = tf2ss(W2.Numerator{1},W2.Denominator{1});
 
-W2ss = ss(A,B,C,D);
+W2 = ss(A,B,C,D);
 
 
-[K,CL,gamma] = mixsyn(G,W1,W2ss,[], 1); %Last argument makes the function try to force gamma to 1
+[K,CL,gamma] = mixsyn(G,W1,W2,[], 1); %Last argument makes the function try to force gamma to 1
 % [K,CL,gamma] = mixsyn(G,W1,[],[]);
 gamma
 
@@ -91,13 +91,13 @@ gamma
 
 L = G*K;
 I = eye(size(L));
-S = feedback(I,L); 
-T= I-S;
+SenFun = feedback(I,L); 
+T= I-SenFun;
 
 close all;
 
 figure;
-sigma(S,'b',W1,'b--',T,'r',W2,'r--',{0.01,1000})
+sigma(SenFun,'b',W1,'b--',T,'r',W2,'r--',{0.01,1000})
 legend('S','W1','T','W3')
 
 figure;
@@ -121,21 +121,6 @@ Marg = allmargin(G*K)
 %          |                                    |
 %          +------------------------------------+
 %                  
-%
-% UNFINISHED:
-% [A,B,C,D] = tf2ss(k,[Is 0 0]);
-% G = ss(A,B,C,D);
-% Ks = Kc*((s+tau1)/s)*((tau2*s+1)/(tau3*s+1));
-% 
-% M = 2;
-% A = 0.01;
-% wb = pi/5;
-% W_p = (s/M + wb)/(s + wb*A) ;% Choose "control sensitivity weight" as highpass filter
-% [Awp,Bwp,Cwp,Dwp] = ssdata(W_p);
-% Wp = ss(Awp,Bwp,Cwp,Dwp);
-
-%ny = 2;
-%nu = 2;
 
 G.InputName = 'ug';
 G.OutputName= 'yg';
@@ -172,15 +157,15 @@ S = append(S1,S2,S3,S4,S5,S6,S7,S8,S9);
 Pcl  = connect(blksys,S,{'r'},{'y','z1','z2','e','u'});
 
 Gcl = feedback(K*G,1);
-% validate: 
-figure ,bode(Pcl('y','r'), (G*K)/(1+G*K),'--r',{0.1,1000})
-disp ('validate that G*K/(1+G*K) == transfer function from ref to y')
-figure ,bode(Pcl('z1','r'), W1/(1+G*K),'--r',{0.1,1000})
-disp ('validate that W1/(1+G*K) == transfer function from ref to z1')
-figure ,bode(Pcl('z2','r'), W2/(1+G*K),'--r',{0.1,1000})
-disp ('validate that W2/(1+G*K) == transfer function from ref to z2')
-figure ,bode(Pcl('e','r'), 1/(1+G*K),'--r',{0.1,1000})
-disp ('validate that 1/(1+G*K) == transfer function from ref to e')
+% % validate: 
+% figure ,bode(Pcl('y','r'), (G*K)/(1+G*K),'--r',{0.1,1000})
+% disp ('validate that G*K/(1+G*K) == transfer function from ref to y')
+% figure ,bode(Pcl('z1','r'), W1/(1+G*K),'--r',{0.1,1000})
+% disp ('validate that W1/(1+G*K) == transfer function from ref to z1')
+% figure ,bode(Pcl('z2','r'), W2/(1+G*K),'--r',{0.1,1000})
+% disp ('validate that W2/(1+G*K) == transfer function from ref to z2')
+% figure ,bode(Pcl('e','r'), 1/(1+G*K),'--r',{0.1,1000})
+% disp ('validate that 1/(1+G*K) == transfer function from ref to e')
 
 % Controller assumes positive feedback
 
@@ -188,12 +173,12 @@ hinfnorm(Pcl('y','r'))
 hinfnorm(Pcl('z1','r'))
 hinfnorm(Pcl('z2','r'))
 hinfnorm(Pcl('e','r'))
+ 
+% figure;
+% step((Pcl))
+% figure;
 
-figure;
-step((Pcl))
-figure;
-
-step(c2d(Pcl,T_s))
+% step(c2d(Pcl,T_s))
 
 
 %% Simulation in Simulink
@@ -207,7 +192,7 @@ step(c2d(Pcl,T_s))
 [numW1, denW1]=ss2tf(W1.A, W1.B, W1.C, W1.D,1)
 
 
-[numW2, denW2]=ss2tf(W2ss.A, W2ss.B, W2ss.C, W2ss.D,1)
+[numW2, denW2]=ss2tf(W2.A, W2.B, W2.C, W2.D,1)
 
 
 
