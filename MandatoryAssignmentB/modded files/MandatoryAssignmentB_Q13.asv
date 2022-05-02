@@ -126,10 +126,7 @@ sigma(W3lowerbound)
 sigma(W3upperbound)
 hold off
 
-%We get an area from 0.01 rad/s to 25 rad/s where the new lower bound and
-%the old upper bound conflict. This is probably due ot the old lower bound
-
-%is caclulated using a too low inertia 
+%We get an area from 0.01 rad/s 
 
 
 
@@ -151,4 +148,5 @@ T_s = 0.004;                    % Sampling period
 %|W1| < (1-|W3*T|)/|S|
 
 
+lft(G_p, K)
 sys = tf([0.833 0],[1 0.089])
