@@ -98,12 +98,13 @@ close all;
 
 figure;
 sigma(SenFun,'b',W1,'b--',T,'r',W2,'r--',{0.01,1000})
-legend('S','W1','T','W2','FontName','times','Interpreter','latex')
+legend('$S$','$W_1$','$T$','$W_2$','Interpreter','latex')
+legend('$\mathbf{S}$', '$\mathbf{W_1}$','FontSize',16,'Interpreter','latex');
 title('Sensitivity and weight functions','Interpreter','latex')
 
 figure;
 sigma(L,'b',W1,'r--',1/W2,'g--',{0.01,1000})
-legend('L','W1','1/W2','Interpreter','latex')
+legend('$L$','$W_1$','$1/W_2$','Interpreter','latex')
 title('Open-loop and weight functions','Interpreter','latex')
 
 %Check phasemargin

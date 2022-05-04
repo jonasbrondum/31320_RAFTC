@@ -27,3 +27,12 @@ hinfnorm(Pcl('e','r'))
 figure;
 step(Pcl)
 
+
+%% Poles and zeros of controller:
+pzG = pzmap(G);
+
+pzK = pzmap(K);
+
+pzW1 = pzmap(W1);
+
+pzW2 = pzmap(W2);

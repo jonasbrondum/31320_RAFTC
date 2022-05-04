@@ -18,12 +18,15 @@ RS_marg = 1 - hinfnorm(CL)
 % som kan beregnes ud fra Closed loop og W1
 % Slides lecture 16 side 16
 
-% |W1*S| + |W3*T| < 1 -->
+% |W1*S| + |W3*T| < 1   -->
 % |W3| < (1 - |W1*S|)/|T|
 
 % Upper bound of W3:
 W3upperbound = (1 - W1*SenFun)/T;
+figure;
 sigma(W3upperbound)
+title('W3 upper bound')
+grid on
 
 % From upperbound we read that for a static gain W3 needs to be less than
 % -23.2 dB
@@ -32,7 +35,8 @@ sigma(W3upperbound)
 
 %% Test of W3
 % Static W3
-W3 = tf(0.0692,1);
+epsilon = 0.01;
+W3 = tf(RS_marg - epsilon,1);
 [A,B,C,D] = tf2ss(W3.Numerator{1},W3.Denominator{1});
 W3 = ss(A,B,C,D);
 
