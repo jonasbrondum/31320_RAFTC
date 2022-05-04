@@ -36,10 +36,8 @@ hold off
 %Fast setup, not very robust stable:
 
 %Setup 1
-%M=5; wb=2; A=1.e-4; % Hvad betyder disse og hvor i bogen kommer de fra?
+M=10; wb=3; A=1.e-4; % Hvad betyder disse og hvor i bogen kommer de fra?
 
-
-M=5; wb=2; A=1.e-4;%Setup 2
 W1 = tf([1/M wb], [1 wb*A]);
 
 
@@ -47,14 +45,24 @@ W1 = tf([1/M wb], [1 wb*A]);
 
 W1 = ss(A,B,C,D);
 
-%W2= makeweight(0.1,10,20)Old, semi-stable "fast", Setup 1
+W2= makeweight(0.2,40,100)%setup 1
 
-W2= makeweight(0.1,10,40)
+%Because S + T = I, mixsyn cannot make both S and T small 
+%(less than 0 dB) in the same frequency range. 
+%Therefore, when you specify weights for loop shaping, 
+%there must be a frequency band in which both W1 and W3 are below 0 dB.
 
-%W2=tf(0.01,1)
-%[A,B,C,D] = tf2ss(W2.Numerator{1},W2.Denominator{1});
+%W1= makeweight(50,0.05,0.8)%Robust stable, Setup 3
 
-%W2 = ss(A,B,C,D);
+%W2= makeweight(0.1,0.1,20)%Robust stable, Setup 3
+
+
+%Setup 2 gives us slight osscilations at 4 Hz, or 25 radians per second.
+%We know our approximation of W3 becomes unstable outside 25 rad/s, so
+%perhaps this is as good as it gets?
+
+
+
 
 
 [K,CL,gamma] = mixsyn(G,W1,W2,W3, 1); %Last argument makes the function try to force gamma to 1
@@ -79,10 +87,18 @@ figure;
 sigma(L,'b',W1,'r--',1/W2,'g--',{0.01,1000})
 legend('L','W1','1/W2')
 
+%Singular values look good, gamma is very close to 1.
+
+sigma(SenFun,'b',L,'r',T,'g',gamma/W1,'b-.',ss(gamma/W2),'r-.',gamma/W3,'g-.',{1e-3,1e3})
+legend('S','KS','T','GAM/W1','GAM/W2','GAM/W3','Location','SouthWest')
+grid
+
 %Check phasemargin
-Marg = allmargin(G*K)
+%Marg = allmargin(G*K)
 
 %%
+
+
 
 
 RS_Marg= 1-hinfnorm(CL)
@@ -110,17 +126,23 @@ sigma(W3lowerbound)
 
 hold off
 
+figure
+title('W1, W2, W3')
+bodemag(W1,W2,W3)
 
 
 %% Simulink 
 
-[numK, denK]=ss2tf(K.A, K.B, K.C, K.D,1)
+[numK, denK]=ss2tf(K.A, K.B, K.C, K.D,1);
 
-[numW1, denW1]=ss2tf(W1.A, W1.B, W1.C, W1.D,1)
+[numW1, denW1]=ss2tf(W1.A, W1.B, W1.C, W1.D,1);
 
 
-[numW2, denW2]=ss2tf(W2.A, W2.B, W2.C, W2.D,1)
+[numW2, denW2]=ss2tf(W2.A, W2.B, W2.C, W2.D,1);
 
+
+%Further, it is important that the controller does not have too high gains.
+%Our controller has crazy high gains
 
 
 x_0 = [0;0;0;0;0;0];            % Initial conditions

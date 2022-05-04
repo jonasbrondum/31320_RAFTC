@@ -1,4 +1,4 @@
-MandatoryAssignmentB_Q13
+%MandatoryAssignmentB_Q13
 
 W3=tf([0.833 0],[1 0.089]);
 
@@ -33,24 +33,53 @@ hold off
 %It is very hard to get a Robust system that is fast. Either we go slow for
 %stability, or we go fast and get oscilations.
 
+%Fast setup, not very robust stable:
 
-M=5; wb=2; A=1.e-4; % Hvad betyder disse og hvor i bogen kommer de fra?
-W1 = tf([1/M wb], [1 wb*A]);
+%Setup 1
 
+s = tf ('s')
 
-[A,B,C,D] = tf2ss(W1.Numerator{1},W1.Denominator{1});
+%notch filter
 
-W1 = ss(A,B,C,D);
-
-W2= makeweight(0.1,10,20)
-
-%W2=tf(0.01,1)
-%[A,B,C,D] = tf2ss(W2.Numerator{1},W2.Denominator{1});
-
-%W2 = ss(A,B,C,D);
+%According to Brian Douglas, i want to lower the peak with 0.001
 
 
-[K,CL,gamma] = mixsyn(G,W1,W2,W3, 1); %Last argument makes the function try to force gamma to 1
+%The two notches match the eigenvalues of G
+wb=31.67;
+Q=1;
+
+W0 = (s^2 + wb^2)/(s^2+(wb/Q)*s+wb^2)
+
+wb=65.8;
+Q=1;
+
+W0 = W0*(s^2 + wb^2)/(s^2+(wb/Q)*s+wb^2)
+
+
+
+[A,B,C,D] = tf2ss(W0.Numerator{1},W0.Denominator{1});
+
+notches=ss(A,B,C,D)
+
+W1 = notches*makeweight(2,10,0.01);
+
+W1=W3+1
+
+%W1=1/feedback(1,G)*2
+
+
+
+
+
+W2= makeweight(0.1,8,10)%setup 1
+
+W2= makeweight(0.8,8,100)%setup 3
+
+W2= makeweight(0.8,25,100)%setup 5
+
+%W2=notches
+
+[K,CL,gamma] = mixsyn(G,W1,W2,W3); %Last argument makes the function try to force gamma to 1
 % [K,CL,gamma] = mixsyn(G,W1,[],[]);
 gamma
 
@@ -72,10 +101,18 @@ figure;
 sigma(L,'b',W1,'r--',1/W2,'g--',{0.01,1000})
 legend('L','W1','1/W2')
 
+%Singular values look good, gamma is very close to 1.
+
+sigma(SenFun,'b',L,'r',T,'g',gamma/W1,'b-.',ss(gamma/W2),'r-.',gamma/W3,'g-.',{1e-3,1e3})
+legend('S','KS','T','GAM/W1','GAM/W2','GAM/W3','Location','SouthWest')
+grid
+
 %Check phasemargin
-Marg = allmargin(G*K)
+%Marg = allmargin(G*K)
 
 %%
+
+
 
 
 RS_Marg= 1-hinfnorm(CL)
@@ -103,17 +140,27 @@ sigma(W3lowerbound)
 
 hold off
 
+figure
+title('W1, W2, W3')
+bodemag(W1,W2,W3)
+
+figure
+sigma(feedback(1,G),feedback(1,G)*W1)
+
 
 
 %% Simulink 
 
-[numK, denK]=ss2tf(K.A, K.B, K.C, K.D,1)
+[numK, denK]=ss2tf(K.A, K.B, K.C, K.D,1);
 
-[numW1, denW1]=ss2tf(W1.A, W1.B, W1.C, W1.D,1)
+%[numW1, denW1]=ss2tf(W1.A, W1.B, W1.C, W1.D,1);
 
 
-[numW2, denW2]=ss2tf(W2.A, W2.B, W2.C, W2.D,1)
+%[numW2, denW2]=ss2tf(W2.A, W2.B, W2.C, W2.D,1);
 
+
+%Further, it is important that the controller does not have too high gains.
+%Our controller has crazy high gains
 
 
 x_0 = [0;0;0;0;0;0];            % Initial conditions
