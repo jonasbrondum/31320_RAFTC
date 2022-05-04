@@ -1,4 +1,4 @@
-%MandatoryAssignmentB_Q13
+MandatoryAssignmentB_Q13
 
 W3=tf([0.833 0],[1 0.089]);
 
@@ -36,14 +36,8 @@ hold off
 %Fast setup, not very robust stable:
 
 %Setup 1
-%M=5; wb=2; A=1.e-4; % Hvad betyder disse og hvor i bogen kommer de fra?
+M=10; wb=3; A=1.e-4; % Hvad betyder disse og hvor i bogen kommer de fra?
 
-
-%M=5; wb=2; A=1.e-4;%Setup 2
-
-
-
-M=60; wb=2; A=1.e-5;%Setup 1
 W1 = tf([1/M wb], [1 wb*A]);
 
 
@@ -51,31 +45,7 @@ W1 = tf([1/M wb], [1 wb*A]);
 
 W1 = ss(A,B,C,D);
 
-%Perhaps W1 should be a notch?
-
-
-wb=0.1;%Setup 1
-zeta=10
-
-W1=tf([0 2*zeta*wb 0], [1 2*zeta*wb wb^2])
-
-%W1=tf([1 0 wb^2], [1 2*zeta wb^2])
-W1=1-W1
-
-[A,B,C,D] = tf2ss(W1.Numerator{1},W1.Denominator{1});
-
-W1 = ss(A,B,C,D);
-
-
-
-%W1= makeweight(50,0.05,0.8)%Setup 2
-
-%W2= makeweight(0.1,0.1,20)%Old, semi-stable "fast", Setup 2
-
-
-
-
-
+W2= makeweight(0.2,40,100)%setup 1
 
 %Because S + T = I, mixsyn cannot make both S and T small 
 %(less than 0 dB) in the same frequency range. 
@@ -90,8 +60,7 @@ W1 = ss(A,B,C,D);
 %Setup 2 gives us slight osscilations at 4 Hz, or 25 radians per second.
 %We know our approximation of W3 becomes unstable outside 25 rad/s, so
 %perhaps this is as good as it gets?
-%W2= makeweight(0.01,5,20)%Setup 2
-W2= makeweight(0.1,8,10)%setup 1
+
 
 
 
@@ -171,6 +140,9 @@ bodemag(W1,W2,W3)
 
 [numW2, denW2]=ss2tf(W2.A, W2.B, W2.C, W2.D,1);
 
+
+%Further, it is important that the controller does not have too high gains.
+%Our controller has crazy high gains
 
 
 x_0 = [0;0;0;0;0;0];            % Initial conditions

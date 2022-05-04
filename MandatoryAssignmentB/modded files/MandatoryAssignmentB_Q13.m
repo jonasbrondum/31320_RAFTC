@@ -132,17 +132,9 @@ hold off
 %is caclulated using a too low inertia 
 
 
-W3upperbound = (1 - W1*SenFun)/T;
-sigma(W3upperbound)
 
 
 
-
-figure
-hold on
-sigma(W3lowerbound)
-sigma(W3upperbound)
-hold off
 
 
 % |T| < 1/|W1|

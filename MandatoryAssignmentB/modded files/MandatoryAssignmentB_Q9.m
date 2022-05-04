@@ -68,6 +68,7 @@ T_s = 0.004;                    % Sampling period
 % Example from book
 % Uses the Robust Control toolbox
 M=2; wb=10; A=1.e-4; % Hvad betyder disse og hvor i bogen kommer de fra?
+%Ligning (2.113)
 W1 = tf([1/M wb], [1 wb*A]);
 
 

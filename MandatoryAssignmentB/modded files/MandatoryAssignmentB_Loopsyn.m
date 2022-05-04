@@ -48,105 +48,17 @@ E_y = double(jacobian(g, d));
 % Top disk is y3 which is theta_3:
 % SISO system from state-space
 G_p = tf(num(3,:),den);
-
-
 %% Redefinition of weights for Simulink simulation
 
-% First we need to make some weights relevant as to the design
-% requirements:
-
-% We want gamma ~= 1
-% And we don't want too high gains
-% We want (almost) integral action meaning (almost) no steady state error
-% We don't want the actuator to go into saturation for a step-response
-
-% Example from book
-% Uses the Robust Control toolbox
-M=2; wb=10; A=1.e-4; % Hvad betyder disse og hvor i bogen kommer de fra?
-W1 = tf([1/M wb], [1 wb*A]);
-
-
-[A,B,C,D] = tf2ss(W1.Numerator{1},W1.Denominator{1});
-
-W1 = ss(A,B,C,D);
-%W1= makeweight(20,35,0.1)
-
-W2=tf(0.01,1)
-[A,B,C,D] = tf2ss(W2.Numerator{1},W2.Denominator{1});
-
-W2 = ss(A,B,C,D);
-
-% High-pass W3
-%W3 = makeweight(0.05,200,50);
-
-[K,CL,gamma] = mixsyn(G_p,W1,W2,[], 1); %Last argument makes the function try to force gamma to 1
-% [K,CL,gamma] = mixsyn(G,W1,[],[]);
-gamma
-
-% First, compare the resulting sensitivity S and complementary sensitivity 
-% T to the corresponding weighting functions W1 and W3. 
-
-L = G_p*K;
-I = eye(size(L));
-SenFun = feedback(I,L); 
-T= I-SenFun;
-
-close all;
-
-figure;
-sigma(SenFun,'b',W1,'b--',T,'r',W2,'r--',{0.01,1000})
-legend('S','W1','T','W3')
-
-figure;
-sigma(L,'b',W1,'r--',1/W2,'g--',{0.01,1000})
-legend('L','W1','1/W2')
-
-
-%loops = loopsens(L,K)
-
-
-
-
-
-%% Lower bound
-
-
-% lower bound bound of W3:
-
 load('G.mat');
-load('W3upperbound.mat');
+s = tf ('s')
 
-W3lowerbound=(G_p-G)/G
+Gd = tf(10,[1 0]);
 
+G_p=6.498e07/(s^6 + 0.276*s^5 + 4520*s^5 + 830.7 * s^4 + 2.31e06*s^3 +2.1e05 * s^2 +21e05*s); %removed last element which was miniscule
 
-%From line 7.26 in the book, we get the lower bound as:
-figure
-hold on
-sigma(W3lowerbound)
-sigma(W3upperbound)
-hold off
-
-%We get an area from 0.01 rad/s 
+alpha = 0;
+[K_mix,CL_mix,gamma_mix,info_mix] = loopsyn(G_p,Gd);
+gamma_mix
 
 
-
-
-
-
-
-% |T| < 1/|W1|
-
-
-%% Sampling period
-
-T_s = 0.004;                    % Sampling period
-
-
-% |W1*S| + |W3*T| < 1 -->
-
-%Isn't this an upper bound as well?
-%|W1| < (1-|W3*T|)/|S|
-
-
-lft(G_p, K)
-sys = tf([0.833 0],[1 0.089])

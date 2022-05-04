@@ -36,48 +36,50 @@ hold off
 %Fast setup, not very robust stable:
 
 %Setup 1
-%M=5; wb=2; A=1.e-4; % Hvad betyder disse og hvor i bogen kommer de fra?
+
+s = tf ('s')
+
+%notch filter
+
+%According to Brian Douglas, i want to lower the peak with 0.001
 
 
-%M=5; wb=2; A=1.e-4;%Setup 2
+%The two notches match the eigenvalues of G
+wb=31.67;
+Q=1;
+
+W0 = (s^2 + wb^2)/(s^2+(wb/Q)*s+wb^2)
+
+wb=65.8;
+Q=1;
+
+W0 = W0*(s^2 + wb^2)/(s^2+(wb/Q)*s+wb^2)
 
 
 
-%M=100; wb=3; A=1.e-4;%Setup 1
+[A,B,C,D] = tf2ss(W0.Numerator{1},W0.Denominator{1});
 
-%W1 = tf([1/M wb], [1 wb*A]);
+notches=ss(A,B,C,D)
 
+W1 = notches*makeweight(2,10,0.01);
 
-%[A,B,C,D] = tf2ss(W1.Numerator{1},W1.Denominator{1});
+W1=W3+1
 
-%W1 = ss(A,B,C,D);
-
-%W1= makeweight(50,0.05,0.8)%Setup 2
-
-%W2= makeweight(0.1,0.1,20)%Old, semi-stable "fast", Setup 2
-W1= makeweight(20,5,0.01)%Setup 3
+%W1=1/feedback(1,G)*2
 
 
-%Because S + T = I, mixsyn cannot make both S and T small 
-%(less than 0 dB) in the same frequency range. 
-%Therefore, when you specify weights for loop shaping, 
-%there must be a frequency band in which both W1 and W3 are below 0 dB.
-
-%W1= makeweight(50,0.05,0.8)%Robust stable, Setup 3
-
-%W2= makeweight(0.1,0.1,20)%Robust stable, Setup 3
 
 
-%Setup 2 gives us slight osscilations at 4 Hz, or 25 radians per second.
-%We know our approximation of W3 becomes unstable outside 25 rad/s, so
-%perhaps this is as good as it gets?
-%W2= makeweight(0.01,5,20)%Setup 2
+
 W2= makeweight(0.1,8,10)%setup 1
 
+W2= makeweight(0.8,8,100)%setup 3
 
+W2= makeweight(0.8,25,100)%setup 5
 
+%W2=notches
 
-[K,CL,gamma] = mixsyn(G,W1,W2,W3, 1); %Last argument makes the function try to force gamma to 1
+[K,CL,gamma] = mixsyn(G,W1,W2,W3); %Last argument makes the function try to force gamma to 1
 % [K,CL,gamma] = mixsyn(G,W1,[],[]);
 gamma
 
@@ -111,6 +113,8 @@ grid
 %%
 
 
+
+
 RS_Marg= 1-hinfnorm(CL)
 
 %Our new controller has a higher robust stability margin, since the closed
@@ -140,16 +144,23 @@ figure
 title('W1, W2, W3')
 bodemag(W1,W2,W3)
 
+figure
+sigma(feedback(1,G),feedback(1,G)*W1)
+
+
 
 %% Simulink 
 
 [numK, denK]=ss2tf(K.A, K.B, K.C, K.D,1);
 
-[numW1, denW1]=ss2tf(W1.A, W1.B, W1.C, W1.D,1);
+%[numW1, denW1]=ss2tf(W1.A, W1.B, W1.C, W1.D,1);
 
 
-[numW2, denW2]=ss2tf(W2.A, W2.B, W2.C, W2.D,1);
+%[numW2, denW2]=ss2tf(W2.A, W2.B, W2.C, W2.D,1);
 
+
+%Further, it is important that the controller does not have too high gains.
+%Our controller has crazy high gains
 
 
 x_0 = [0;0;0;0;0;0];            % Initial conditions
