@@ -56,7 +56,6 @@ Q=1;
 W0 = W0*(s^2 + wb^2)/(s^2+(wb/Q)*s+wb^2)
 
 
-
 [A,B,C,D] = tf2ss(W0.Numerator{1},W0.Denominator{1});
 
 notches=ss(A,B,C,D)

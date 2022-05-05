@@ -78,10 +78,12 @@ W1 = ss(A,B,C,D);
 %W1= makeweight(20,35,0.1)
 
 W2=tf(0.01,1)
+
 [A,B,C,D] = tf2ss(W2.Numerator{1},W2.Denominator{1});
 
 W2 = ss(A,B,C,D);
 
+%W2= makeweight(0.2,50,10)%setup 1
 
 [K,CL,gamma] = mixsyn(G,W1,W2,[], 1); %Last argument makes the function try to force gamma to 1
 % [K,CL,gamma] = mixsyn(G,W1,[],[]);

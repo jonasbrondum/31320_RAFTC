@@ -36,7 +36,7 @@ hold off
 %Fast setup, not very robust stable:
 
 %Setup 1
-M=100; wb=3; A=1.e-4; % Hvad betyder disse og hvor i bogen kommer de fra?
+M=10; wb=3; A=1.e-4; % Hvad betyder disse og hvor i bogen kommer de fra?
 
 W1 = tf([1/M wb], [1 wb*A]);
 
@@ -47,25 +47,14 @@ W1 = ss(A,B,C,D);
 
 W2= makeweight(0.2,40,100)%setup 1
 
-
-
-
-%wb=25;
-
-%W0 = W0*(s^2 + wb^2)/(s^2+(wb/Q)*s+wb^2)
-
-
-
-
-
 %Because S + T = I, mixsyn cannot make both S and T small 
 %(less than 0 dB) in the same frequency range. 
 %Therefore, when you specify weights for loop shaping, 
 %there must be a frequency band in which both W1 and W3 are below 0 dB.
 
-%W1= makeweight(50,0.05,0.8)%Robust stable, Setup 3
+W1= makeweight(50,0.02,0.1)%Robust perfomance, Setup 3
 
-%W2= makeweight(0.1,0.1,20)%Robust stable, Setup 3
+W2= 0.8*makeweight(0.1,0.05,2)%Robust perfomance, Setup 3
 
 
 %Setup 2 gives us slight osscilations at 4 Hz, or 25 radians per second.
@@ -109,7 +98,7 @@ grid
 
 %%
 
-%Gamma / weight > 
+
 
 
 RS_Marg= 1-hinfnorm(CL)
