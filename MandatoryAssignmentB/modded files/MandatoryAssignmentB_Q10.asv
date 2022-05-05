@@ -5,12 +5,10 @@ MandatoryAssignmentB_Q9
 
 %% Unfinished..
 
-%% Result validation validate: 
+%% Result validationvalidate: 
 figure ,bode(Pcl('y','r'), (G*K)/(1+G*K),'--r',{0.1,1000})
 disp ('validate that G*K/(1+G*K) == transfer function from ref to y')
-title('Reference ($r$) to output ($y$)','FontName','times','Interpreter','latex')
-legend('$P\_{CL}$','$G\cdot K/(1 + G \cdot K)$','FontName','times','Interpreter','latex')
-grid on
+title('Reference ($r$) to output ($y$)')
 
 figure ,bode(Pcl('z1','r'), W1/(1+G*K),'--r',{0.1,1000})
 disp ('validate that W1/(1+G*K) == transfer function from ref to z1')
@@ -35,7 +33,7 @@ hinfnorm(Pcl('e','r'))
 
 figure;
 step(Pcl('y','r'))
-title('Output, $y$, for reference ($r$) step','FontName','times','Interpreter','latex')
+title('Output, $y$, for reference step',)
 
 
 
