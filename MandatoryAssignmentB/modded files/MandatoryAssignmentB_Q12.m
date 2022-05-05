@@ -16,8 +16,8 @@ MandatoryAssignmentB_Q9
 [magT phase wT] = bode(T);
 
 C=squeeze(1./(magT));
-sys=frd(C,wT);
-figure, bodemag(sys)
+sysStab=frd(C,wT);
+figure, bodemag(sysStab)
 title('$W_3$ upper bound','FontName','times','Interpreter','latex')
 grid on
 
@@ -32,8 +32,8 @@ grid on
 
 [magW1S,p1]=bode(W1*SenFun,wT);
 C=squeeze((1 - magW1S)./(magT));
-sys=frd(C,wT);
-figure, bodemag(sys)
+sysPerf=frd(C,wT);
+figure, bodemag(sysPerf)
 title('Robust performance','FontName','times','Interpreter','latex')
 grid on
 
