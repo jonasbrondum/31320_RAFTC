@@ -132,9 +132,9 @@ grid on
 %setoptions(h,'Grid','on');
 %set(h,{'LineWidth'},{2})
 %legend('$\mathbf{\theta_{ref}}$', '$\mathbf{\theta_{measured}}$','FontSize',16,'Interpreter','latex');
-%xlabel('Frequency [rad/s]','FontName','times','FontSize',16,'Interpreter','latex')
-%ylabel('Magnitude [dB]','FontName','times','FontSize',16,'Interpreter','latex')
-title('Lower boundary for $W_I$','FontSize',16,'Interpreter','latex');
+xlabel('Frequency [rad/s]','FontName','times','FontSize',16,'Interpreter','latex')
+ylabel('$Magnitude [dB]$','FontName','times','FontSize',16,'Interpreter','latex')
+title('Lower threshold for $\mathbf{W_}$');
 hold off
 
 
