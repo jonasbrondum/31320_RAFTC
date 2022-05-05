@@ -103,11 +103,6 @@ legend('L','W1','1/W2')
 
 
 %loops = loopsens(L,K)
-
-
-
-
-
 %% Lower bound
 
 
@@ -151,12 +146,6 @@ hold off
 
 %is caclulated using a too low inertia 
 
-
-
-
-
-
-
 % |T| < 1/|W1|
 
 
@@ -167,7 +156,6 @@ T_s = 0.004;                    % Sampling period
 
 % |W1*S| + |W3*T| < 1 -->
 
-%Isn't this an upper bound as well?
 %|W1| < (1-|W3*T|)/|S|
 
 

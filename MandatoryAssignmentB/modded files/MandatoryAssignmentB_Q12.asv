@@ -16,8 +16,8 @@ MandatoryAssignmentB_Q9
 [magT phase wT] = bode(T);
 
 C=squeeze(1./(magT));
-sysStab=frd(C,wT);
-figure, bodemag(sysStab)
+sys=frd(C,wT);
+figure, bodemag(sys)
 title('$W_3$ upper bound','FontName','times','Interpreter','latex')
 grid on
 
@@ -32,8 +32,8 @@ grid on
 
 [magW1S,p1]=bode(W1*SenFun,wT);
 C=squeeze((1 - magW1S)./(magT));
-sysPerf=frd(C,wT);
-figure, bodemag(sysPerf)
+sys=frd(C,wT);
+figure, bodemag(sys)
 title('Robust performance','FontName','times','Interpreter','latex')
 grid on
 
@@ -41,11 +41,17 @@ grid on
 % From upperbound we read that for a static gain W3 needs to be less than
 % -23.2 dB
 
-% In other words a high-pass filter could be a good solution.
+% I a high-pass filter could be a good solution.
 
 %% Test of W3
+% Static W3
+epsilon = 0.01;
+W3 = tf(RS_marg - epsilon,1);
+[A,B,C,D] = tf2ss(W3.Numerator{1},W3.Denominator{1});
+W3 = ss(A,B,C,D);
 
 % High-pass W3
 W3 = makeweight(0.05,200,50);
 
-bodemag(W1*SenFun + W3*T)
+sigma(W1*SenFun + W3*T)
+hinfnorm(W1*SenFun + W3*T)

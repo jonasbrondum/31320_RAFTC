@@ -108,6 +108,7 @@ figure;
 sigma(L,'b',W1,'r--',1/W2,'g--',{0.01,1000})
 legend('L','W1','1/W2','Interpreter','latex')
 title('Open-loop and weight functions','Interpreter','latex')
+close all
 
 %Check phasemargin
 Marg = allmargin(G*K)
