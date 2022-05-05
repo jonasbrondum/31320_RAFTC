@@ -4,16 +4,10 @@ MandatoryAssignmentB_Q9
 
 %% Question 12
 
-% Maximal multiplicative uncertainty for Robust Stability (RS):
-% (BRUGES IKKE) Page 262 about SISO uncertainty
-
-
-
-
 % Robust stability er frekvens afhængigt så den er defineret som:
 % |W_I*T| < 1
 % Upper bound of W3:
-[magT phase wT] = bode(T);
+[magT phase wT] = bode(T, {0.001,1000});
 
 C=squeeze(1./(magT));
 sysStab=frd(C,wT);
