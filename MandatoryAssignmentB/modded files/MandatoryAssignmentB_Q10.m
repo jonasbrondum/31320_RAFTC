@@ -49,29 +49,31 @@ title('Output, $y$, for reference ($r$) step','FontName','times','Interpreter','
 [pW1, zW1] = pzmap(W1);
 
 [pW2, zW2] = pzmap(W2);
-
-figure;
-pzmap(CL)
-title('Controller $K$; poles and zeros','FontName','times','Interpreter','latex')
-grid on
-
-figure;
-pzmap(Pcl('z2','r'))
-title('Closed loop system; poles and zeros','FontName','times','Interpreter','latex')
-grid on
-
-figure;
-pzplot(K,G,W1,W2)
-title('Pole-zero plot of controller ($K$), plant ($G$), and weight functions $W_1$ and $W_2$','FontName','times','Interpreter','latex')
-legend('$K$','$G$','$W\_1$','$W\_2$','Location','southwest','FontName','times','Interpreter','latex')
-grid on
+% 
+% figure;
+% pzmap(CL)
+% title('Controller $K$; poles and zeros','FontName','times','Interpreter','latex')
+% grid on
+% 
+% figure;
+% pzmap(Pcl('z2','r'))
+% title('Closed loop system; poles and zeros','FontName','times','Interpreter','latex')
+% grid on
 
 figure;
 pzplot(K,G,W1,W2)
 title('Pole-zero plot of controller ($K$), plant ($G$), and weight functions $W_1$ and $W_2$','FontName','times','Interpreter','latex')
 legend('$K$','$G$','$W\_1$','$W\_2$','Location','southwest','FontName','times','Interpreter','latex')
-axis([-25 1 -80 80])
 grid on
+saveas(gcf,'figures/Q10_pz_zoomout.svg')
+
+figure;
+pzplot(K,G,W1,W2)
+title('Pole-zero plot of controller ($K$), plant ($G$), and weight functions $W_1$ and $W_2$','FontName','times','Interpreter','latex')
+legend('$K$','$G$','$W\_1$','$W\_2$','Location','southwest','FontName','times','Interpreter','latex')
+axis([-5 0.3 -80 80])
+grid on
+saveas(gcf,'figures/Q10_pz_zoomin.svg')
 
 %% Design verification
 
