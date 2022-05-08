@@ -5,20 +5,21 @@ MandatoryAssignmentB_Q9
 
 sim('threeDiskOscillatorRig_noFric');
 
-%% PLotting position
+%% Plotting position
 
 figure
 hold on
 plot(position,'LineWidth',2)
 xlabel('Time [sec]','FontName','times','FontSize',16,'Interpreter','latex')
-ylabel('$\mathbf{r}(t)$','FontName','times','FontSize',16,'Interpreter','latex')
-hold off
+ylabel('$r(t)$','FontName','times','FontSize',16,'Interpreter','latex')
+saveas(gcf,'figures/Q11_position.svg')
+
 
 %% Plotting control signal
 figure
 hold on
 plot(input,'LineWidth',2)
 xlabel('Time [sec]','FontName','times','FontSize',16,'Interpreter','latex')
-ylabel('$\mathbf{r}(t)$','FontName','times','FontSize',16,'Interpreter','latex')
-hold off
+ylabel('$u(t)$','FontName','times','FontSize',16,'Interpreter','latex')
+saveas(gcf,'figures/Q11_input.svg')
 
