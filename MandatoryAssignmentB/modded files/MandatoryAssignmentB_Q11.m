@@ -22,3 +22,8 @@ xlabel('Time [sec]','FontName','times','FontSize',16,'Interpreter','latex')
 ylabel('$\mathbf{r}(t)$','FontName','times','FontSize',16,'Interpreter','latex')
 hold off
 
+nominalPosition = position;
+nominalInput = input;
+
+save('nominal.mat','nominalPosition','nominalInput')
+

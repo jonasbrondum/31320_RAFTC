@@ -67,8 +67,9 @@ T_s = 0.004;                    % Sampling period
 
 % Example from book
 % Uses the Robust Control toolbox
-M=2; wb=10; A=1.e-4; % Hvad betyder disse og hvor i bogen kommer de fra?
+M=2; wb=5; A=1.e-3; % Hvad betyder disse og hvor i bogen kommer de fra?
 %Ligning (2.113)
+%M=10; wb=3; A=1.e-4; % Hvad betyder disse og hvor i bogen kommer de fra?
 W1 = tf([1/M wb], [1 wb*A]);
 
 
@@ -77,15 +78,15 @@ W1 = tf([1/M wb], [1 wb*A]);
 W1 = ss(A,B,C,D);
 %W1= makeweight(20,35,0.1)
 
-W2=tf(0.01,1)
+W2=tf(0.008,1)
 
 [A,B,C,D] = tf2ss(W2.Numerator{1},W2.Denominator{1});
 
 W2 = ss(A,B,C,D);
 
-%W2= makeweight(0.2,50,10)%setup 1
+W2= makeweight(0.001,40,20)%setup 1
 
-[K,CL,gamma] = mixsyn(G,W1,W2,[], 1); %Last argument makes the function try to force gamma to 1
+[K,CL,gamma] = mixsyn(G,W1,W2,[],1); %Last argument makes the function try to force gamma to 1
 % [K,CL,gamma] = mixsyn(G,W1,[],[]);
 gamma
 

@@ -121,7 +121,7 @@ set(0,'DefaultLineLineWidth',5)
 
 figure
 hold on
-sigma(W3lowerbound)
+sigma(W3lowerbound, {0.001,1000})
 grid on
 
 %setoptions(h,'Grid','on');
@@ -137,8 +137,11 @@ hold off
 %From line 7.26 in the book, we get the lower bound as:
 figure
 hold on
-sigma(W3lowerbound)
-sigma(W3upperbound)
+sigma(W3lowerbound,{0.001,1000})
+sigma(sysPerf)
+grid on
+title('Lower boundary for $G_p$ and upper boundary for $G$','FontSize',16,'Interpreter','latex');
+legend('Lower boundary','Upper boundary')
 hold off
 
 %We get an area from 0.01 rad/s to 25 rad/s where the new lower bound and

@@ -5,13 +5,16 @@ W3=tf([0.833 0],[1 0.089]);
 
 %The given weight function for W_I is just above the lower bound between
 %4.8e-07 rad/s and 23.6 rad/s. It is a good approximation!
-
+%%
 
 figure
 hold on
 title('W_I and the lower bound function');
-sigma(W3)
-sigma(W3lowerbound)
+sigma(W3lowerbound, {0.001,10^3})
+sigma(W3,{0.001,10^3})
+grid on
+title('Lower boundary and the given $W_3$ transfer function','FontSize',16,'Interpreter','latex');
+legend('Lower boundary','$W_3$','Interpreter','latex')
 hold off
 
 
@@ -36,7 +39,10 @@ hold off
 %Fast setup, not very robust stable:
 
 %Setup 1
-M=100; wb=3; A=1.e-4; % Hvad betyder disse og hvor i bogen kommer de fra?
+M=10; wb=3; A=1.e-4; % Hvad betyder disse og hvor i bogen kommer de fra?
+
+%1/M is the gain after the cutoff. We need a lower gain in the second
+%iteration, as we have a lower
 
 W1 = tf([1/M wb], [1 wb*A]);
 
@@ -51,6 +57,7 @@ W2= makeweight(0.2,40,100)%setup 1
 
 
 %wb=25;
+
 
 %W0 = W0*(s^2 + wb^2)/(s^2+(wb/Q)*s+wb^2)
 
@@ -144,8 +151,13 @@ sigma(W3lowerbound)
 hold off
 
 figure
+hold on
 title('W1, W2, W3')
-bodemag(W1,W2,W3)
+bodemag(W1,W2,W3, {0.01, 1000})
+grid on
+title('Weight functions for $G_p$','FontSize',16,'Interpreter','latex')
+legend('$Wp$','$Wu$','$WI$','Interpreter','latex')
+hold off
 
 
 %% Simulink 
