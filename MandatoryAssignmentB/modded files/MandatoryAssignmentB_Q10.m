@@ -73,6 +73,6 @@ saveas(gcf,'figures/Q10_pz_zoomin.svg')
 %% Design verification
 
 figure;
-step(Pcl)
+step(c2d(Pcl,T_s))
 title('Reference step to y','FontName','times','Interpreter','latex')
 saveas(gcf, 'figures/Q10_design_verification.svg')
