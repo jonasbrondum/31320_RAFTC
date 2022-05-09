@@ -16,8 +16,7 @@ sigma(W3,{0.001,10^3})
 %ylim([-30,50]);
 grid on
 title('Lower boundary and the given $W_3$ transfer function','FontSize',16,'Interpreter','latex');
-legend('$W\_I$','Lower boundary','FontName', 'times','Interpreter','latex')
-
+legend('W_I','Lower boundary','Interpreter','latex')
 saveas(gcf,'figures\Q14_lowerbound_WI.svg')
 
 hold off
@@ -45,7 +44,6 @@ hold off
 
 %Setup 1
 M=10; wb=3; A=1.e-4; % Hvad betyder disse og hvor i bogen kommer de fra?
-
 %M=5; wb=5; A=1.e-3; % Hvad betyder disse og hvor i bogen kommer de fra?
 
 %1/M is the gain after the cutoff. We need a lower gain in the second
@@ -124,7 +122,7 @@ title('W1, W2, W3')
 bodemag(W1,W2,W3, {0.01, 1000})
 grid on
 title('Weight functions for $G_p$','FontSize',16,'Interpreter','latex')
-legend('$W\_p$','$W\_u$','$W\_I$','FontName', 'times','Interpreter','latex')
+legend('$W_p$','$W_u$','$W_I$','Fontname','Interpreter','latex')
 saveas(gcf,'figures,Q14_weights.svg')
 hold off
 
@@ -145,14 +143,12 @@ bodemag(W3*T)
 hold off
 
 
-
 figure
 hold on
 bodemag(W1*SenFun)
 bodemag(W3*T)
 bodemag(W1*SenFun+W3*T)
-legend('$|W\_p \cdot S|$','$|W\_I \cdot T|$','$|W\_p \cdot S| + |W\_I \cdot T|$','FontName', 'times','Interpreter','latex')
-%legend('W1*S', 'W3*T', 'W1*S+W3*T')
+legend('W1*S', 'W3*T', 'W1*S+W3*T')
 title('Multiplicative uncertainty conditions');
 grid on
 ylim([-30,5])

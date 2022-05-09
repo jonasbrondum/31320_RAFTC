@@ -15,9 +15,7 @@ figure, bodemag(sysStab)
 title('$W_3$ upper bound','FontName','times','Interpreter','latex')
 grid on
 
-W3upperbound=sysStab
-
-save('W3upperbound.mat', 'W3upperbound');
+load('W3upperbound.mat');
 
 
 % Robust performance
