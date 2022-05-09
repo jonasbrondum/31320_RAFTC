@@ -98,18 +98,20 @@ I = eye(size(L));
 SenFun = feedback(I,L); 
 T= I-SenFun;
 
-close all;
-
-figure;
-sigma(SenFun,'b',W1,'b--',T,'r',W2,'r--',{0.01,1000})
-legend('S','W1','T','W2','FontName','times','Interpreter','latex')
-title('Sensitivity and weight functions','Interpreter','latex')
-
-figure;
-sigma(L,'b',W1,'r--',1/W2,'g--',{0.01,1000})
-legend('L','W1','1/W2','Interpreter','latex')
-title('Open-loop and weight functions','Interpreter','latex')
-close all
+% close all;
+% 
+% figure;
+% sigma(SenFun,'b',W1,'b--',T,'r',W2,'r--',{0.01,1000})
+% legend('S','W1','T','W2','FontName','times','Interpreter','latex')
+% title('Sensitivity and weight functions','Interpreter','latex')
+% grid on
+% saveas(gcf,'figures/Q9_sensitivity_weight_functions.svg')
+% 
+% figure;
+% sigma(L,'b',W1,'r--',1/W2,'g--',{0.01,1000})
+% legend('L','W1','1/W2','Interpreter','latex')
+% title('Open-loop and weight functions','Interpreter','latex')
+% close all
 
 %Check phasemargin
 Marg = allmargin(G*K)
