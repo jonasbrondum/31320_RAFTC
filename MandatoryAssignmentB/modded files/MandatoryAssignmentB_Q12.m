@@ -14,6 +14,7 @@ sysStab=frd(C,wT);
 figure, bodemag(sysStab)
 title('$W_3$ upper bound','FontName','times','Interpreter','latex')
 grid on
+saveas(gcf, 'figures/Q12_upper_bound_stability.svg')
 
 W3upperbound=sysStab
 
@@ -34,16 +35,10 @@ sysPerf=frd(C,wT);
 figure, bodemag(sysPerf)
 title('Robust performance','FontName','times','Interpreter','latex')
 grid on
+saveas(gcf, 'figures/Q12_upper_bound_performance.svg')
 
 
 % From upperbound we read that for a static gain W3 needs to be less than
 % -23.2 dB
 
 % In other words a high-pass filter could be a good solution.
-
-%% Test of W3
-
-% High-pass W3
-W3 = makeweight(0.05,200,50);
-
-bodemag(W1*SenFun + W3*T)

@@ -78,13 +78,13 @@ W1 = tf([1/M wb], [1 wb*A]);
 W1 = ss(A,B,C,D);
 %W1= makeweight(20,35,0.1)
 
-W2=tf(0.008,1)
+% W2=tf(0.008,1)
+% 
+% [A,B,C,D] = tf2ss(W2.Numerator{1},W2.Denominator{1});
+% 
+% W2 = ss(A,B,C,D);
 
-[A,B,C,D] = tf2ss(W2.Numerator{1},W2.Denominator{1});
-
-W2 = ss(A,B,C,D);
-
-W2= makeweight(0.001,40,20)%setup 1
+W2 = makeweight(0.001,40,20) %setup 1
 
 [K,CL,gamma] = mixsyn(G,W1,W2,[],1); %Last argument makes the function try to force gamma to 1
 % [K,CL,gamma] = mixsyn(G,W1,[],[]);
@@ -98,20 +98,19 @@ I = eye(size(L));
 SenFun = feedback(I,L); 
 T= I-SenFun;
 
-% close all;
-% 
-% figure;
-% sigma(SenFun,'b',W1,'b--',T,'r',W2,'r--',{0.01,1000})
-% legend('S','W1','T','W2','FontName','times','Interpreter','latex')
-% title('Sensitivity and weight functions','Interpreter','latex')
-% grid on
-% saveas(gcf,'figures/Q9_sensitivity_weight_functions.svg')
-% 
-% figure;
-% sigma(L,'b',W1,'r--',1/W2,'g--',{0.01,1000})
-% legend('L','W1','1/W2','Interpreter','latex')
-% title('Open-loop and weight functions','Interpreter','latex')
-% close all
+figure;
+sigma(SenFun,'b',W1,'b--',T,'r',W2,'r--',{0.01,1000})
+legend('S','W1','T','W2','FontName','times','Interpreter','latex')
+title('Sensitivity and weight functions','Interpreter','latex')
+grid on
+saveas(gcf,'figures/Q9_sensitivity_weight_functions.svg')
+
+figure;
+sigma(L,'b',W1,'r--',1/W2,'g--',{0.01,1000})
+legend('L','W1','1/W2','Interpreter','latex')
+title('Open-loop and weight functions','Interpreter','latex')
+saveas(gcf,'figures/Q9_open_loop_weight_functions.svg')
+close all
 
 %Check phasemargin
 Marg = allmargin(G*K)
@@ -207,27 +206,3 @@ hinfnorm(Pcl('e','r'))
 
 x_0 = [0;0;0;0;0;0];            % Initial conditions
 T_s = 0.0004;                    % Sampling period
-%[numW1 denW1] = (tfdata(W1));
-
-%numW1=cell2mat(numW1)
-%denW1=cell2mat(denW1)
-
-
-%W2 = tf(0.1,1);
-
-%[numW2 denW2] = cell2mat(tfdata(W2));
-
-%[numKtf denKtf] = tfdata(Ktf);
-
-% 
-% %% Example from book
-% % Uses the Robust Control toolbox
-% %G=tf(200,conv([10 1],conv([0.05 1],[0.05 1]))); % Plant is G.
-% M=1.5; wb=10; A=1.e-4;
-% Wp = tf([1/M wb], [1 wb*A]); Wu = 1; % Weights.
-% % Find H-infinity optimal controller:
-% [khinf,ghinf,gopt] = mixsyn(G,Wp,Wu,[]);
-% Marg = allmargin(G*khinf) % Gain and phase margins
-
-
-
