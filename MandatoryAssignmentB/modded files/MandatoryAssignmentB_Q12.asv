@@ -12,7 +12,7 @@ MandatoryAssignmentB_Q9
 C=squeeze(1./(magT));
 sysStab=frd(C,wT);
 figure, bodemag(sysStab)
-title('$W_3$ upper bound for robust stability','FontName','times','Interpreter','latex')
+title('$W_3$ upper bound for robust st','FontName','times','Interpreter','latex')
 grid on
 saveas(gcf, 'figures/Q12_upper_bound_stability.svg')
 
@@ -29,7 +29,7 @@ saveas(gcf, 'figures/Q12_upper_bound_stability.svg')
 C=squeeze((1 - magW1S)./(magT));
 sysPerf=frd(C,wT);
 figure, bodemag(sysPerf)
-title('$W_3$ upper bound for robust performance','FontName','times','Interpreter','latex')
+title('Robust performance','FontName','times','Interpreter','latex')
 grid on
 saveas(gcf, 'figures/Q12_upper_bound_performance.svg')
 

@@ -14,14 +14,14 @@ saveas(gcf, 'figures/Q10_closed_loop_ref2y.svg')
 figure ,bode(Pcl('z1','r'), W1/(1+G*K),'--r',{0.1,1000})
 disp ('validate that W1/(1+G*K) == transfer function from ref to z1')
 title('Reference ($r$) to $z_1$','FontName','times','Interpreter','latex')
-legend('$P\_{CL}$','$W_1/(1 + G \cdot K)$','FontName','times','Interpreter','latex')
+legend('$P\_{CL}$','$W\_1/(1 + G \cdot K)$','FontName','times','Interpreter','latex')
 grid on
 saveas(gcf, 'figures/Q10_closed_loop_ref2z1.svg')
 
 figure ,bode(Pcl('z2','r'), (W2*K)/(1+G*K),'--r',{0.1,1000})
 disp ('validate that (W2*K)/(1+G) == transfer function from ref to z2')
 title('Reference ($r$) to $z_2$','FontName','times','Interpreter','latex')
-legend('$P\_{CL}$','$W_2\cdot K/(1 + G \cdot K)$','FontName','times','Interpreter','latex')
+legend('$P\_{CL}$','$W\_2\cdot K/(1 + G \cdot K)$','FontName','times','Interpreter','latex')
 grid on
 saveas(gcf, 'figures/Q10_closed_loop_ref2z2.svg')
 

@@ -117,6 +117,7 @@ W3lowerbound=(G_p-G)/G
 %plotoptions.LineWidth = 2;
 %plotoptions.FreqUnits = 'Hz';
 %plotoptions.Grid = 'on';
+set(0,'DefaultLineLineWidth',5)
 
 figure
 hold on
