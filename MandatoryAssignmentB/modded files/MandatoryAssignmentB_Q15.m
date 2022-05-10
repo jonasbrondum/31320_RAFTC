@@ -1,23 +1,28 @@
 
+MandatoryAssignmentB_Q14
+J_1 = 0.0325;  %CHANGED
+
 sim('threeDiskOscillatorRig_noFric');
+
 
 %% PLotting position
 
 
-figure
-hold on
-plot(position,'LineWidth',2)
-xlabel('Time [sec]','FontName','times','FontSize',16,'Interpreter','latex')
-ylabel('Disc 3 position [rad]','FontName','times','FontSize',16,'Interpreter','latex')
-hold off
+% figure
+% hold on
+% plot(position,'LineWidth',2)
+% xlabel('Time [sec]','FontName','times','FontSize',16,'Interpreter','latex')
+% ylabel('Disc 3 position [rad]','FontName','times','FontSize',16,'Interpreter','latex')
+% hold off
 
 %% Plotting control signal
-figure
-hold on
-plot(input,'LineWidth',2)
-xlabel('Time [sec]','FontName','times','FontSize',16,'Interpreter','latex')
-ylabel('Input signal [V]','FontName','times','FontSize',16,'Interpreter','latex')
-hold off
+% figure
+% hold on
+% plot(input,'LineWidth',2)
+% xlabel('Time [sec]','FontName','times','FontSize',16,'Interpreter','latex')
+% ylabel('Input signal [V]','FontName','times','FontSize',16,'Interpreter','latex')
+% saveas(gcf,'figures,Q15_input.svg')
+% hold off
 
 %% Plotting with nominal controller
 
@@ -30,7 +35,8 @@ plot(position,'LineWidth',2)
 title('Step response of the two systems');
 xlabel('Time [sec]','FontName','times','FontSize',16,'Interpreter','latex')
 ylabel('Disc 3 position [rad]','FontName','times','FontSize',16,'Interpreter','latex')
-legend('Nominal system', 'Disturbed system');
+legend('$G$ Nominal system','$G_p$ Uncertain system','FontName', 'times','Interpreter','latex')
+saveas(gcf,'figures\Q15_position.svg')
 hold off
 
 figure
@@ -40,7 +46,9 @@ plot(input,'LineWidth',2)
 title('Control signal of the two systems');
 xlabel('Time [sec]','FontName','times','FontSize',16,'Interpreter','latex')
 ylabel('Input signal [V]','FontName','times','FontSize',16,'Interpreter','latex')
-legend('Nominal system', 'Disturbed system');
+legend('$G$ Nominal system','$G_p$ Uncertain system','FontName', 'times','Interpreter','latex')
+
+saveas(gcf,'figures\Q15_input.svg')
 hold off
 
 

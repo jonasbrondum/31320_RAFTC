@@ -12,9 +12,16 @@ MandatoryAssignmentB_Q9
 C=squeeze(1./(magT));
 sysStab=frd(C,wT);
 figure, bodemag(sysStab)
+<<<<<<< HEAD
 title('$W_3$ upper bound for robust st','FontName','times','Interpreter','latex')
 grid on
 saveas(gcf, 'figures/Q12_upper_bound_stability.svg')
+=======
+title('$W_3$ upper bound','FontName','times','Interpreter','latex')
+grid on
+
+load('W3upperbound.mat');
+>>>>>>> 000533ee700a3c054e7f4c42a4a3af1ffb4da24a
 
 
 % Robust performance
@@ -31,10 +38,24 @@ sysPerf=frd(C,wT);
 figure, bodemag(sysPerf)
 title('Robust performance','FontName','times','Interpreter','latex')
 grid on
+<<<<<<< HEAD
 saveas(gcf, 'figures/Q12_upper_bound_performance.svg')
+=======
+>>>>>>> 000533ee700a3c054e7f4c42a4a3af1ffb4da24a
 
 
 % From upperbound we read that for a static gain W3 needs to be less than
 % -23.2 dB
 
+<<<<<<< HEAD
 % In other words a high-pass filter could be a good solution.
+=======
+% In other words a high-pass filter could be a good solution.
+
+%% Test of W3
+
+% High-pass W3
+W3 = makeweight(0.05,200,50);
+
+bodemag(W1*SenFun + W3*T)
+>>>>>>> 000533ee700a3c054e7f4c42a4a3af1ffb4da24a

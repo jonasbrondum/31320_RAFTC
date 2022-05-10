@@ -16,6 +16,10 @@ title('$W_3$ upper bound for robust stability','FontName','times','Interpreter',
 grid on
 saveas(gcf, 'figures/Q12_upper_bound_stability.svg')
 
+W3upperbound=sysStab
+
+save('W3upperbound.mat', 'W3upperbound');
+
 
 % Robust performance
 % Vi har defineret en cirkel til Wp (W1), S og T, men vi mangler WI (W3),
