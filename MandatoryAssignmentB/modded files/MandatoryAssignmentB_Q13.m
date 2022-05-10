@@ -59,25 +59,11 @@ load('W3upperbound.mat');
 
 W3lowerbound=(G_p-G)/G
 
-%plotoptions = sigmaoptions;
-%plotoptions.LineWidth = 2;
-%plotoptions.FreqUnits = 'Hz';
-%plotoptions.Grid = 'on';
-<<<<<<< HEAD
-=======
-%set(0,'DefaultLineLineWidth',5)
->>>>>>> 000533ee700a3c054e7f4c42a4a3af1ffb4da24a
-
 figure
 hold on
 sigma(W3lowerbound, {0.001,1000})
 grid on
 
-%setoptions(h,'Grid','on');
-%set(h,{'LineWidth'},{2})
-%legend('$\mathbf{\theta_{ref}}$', '$\mathbf{\theta_{measured}}$','FontSize',16,'Interpreter','latex');
-%xlabel('Frequency [rad/s]','FontName','times','FontSize',16,'Interpreter','latex')
-%ylabel('Magnitude [dB]','FontName','times','FontSize',16,'Interpreter','latex')
 title('Lower boundary for $W_I$','FontSize',16,'Interpreter','latex');
 saveas(gcf,'figures/Q13_lower.svg')
 hold off
@@ -96,22 +82,3 @@ legend('Upper boundary','Lower boundary')
 saveas(gcf,'figures/Q13_lower_and_upper.svg')
 hold off
 
-%We get an area from 0.01 rad/s to 25 rad/s where the new lower bound and
-%the old upper bound conflict. This is probably due ot the old lower bound
-
-%is caclulated using a too low inertia 
-
-% |T| < 1/|W1|
-
-
-%% Sampling period
-
-T_s = 0.004;                    % Sampling period
-
-
-% |W1*S| + |W3*T| < 1 -->
-
-%|W1| < (1-|W3*T|)/|S|
-
-
-sys = tf([0.833 0],[1 0.089])

@@ -5,25 +5,6 @@ J_1 = 0.0325;  %CHANGED
 sim('threeDiskOscillatorRig_noFric');
 
 
-%% PLotting position
-
-
-% figure
-% hold on
-% plot(position,'LineWidth',2)
-% xlabel('Time [sec]','FontName','times','FontSize',16,'Interpreter','latex')
-% ylabel('Disc 3 position [rad]','FontName','times','FontSize',16,'Interpreter','latex')
-% hold off
-
-%% Plotting control signal
-% figure
-% hold on
-% plot(input,'LineWidth',2)
-% xlabel('Time [sec]','FontName','times','FontSize',16,'Interpreter','latex')
-% ylabel('Input signal [V]','FontName','times','FontSize',16,'Interpreter','latex')
-% saveas(gcf,'figures,Q15_input.svg')
-% hold off
-
 %% Plotting with nominal controller
 
 load('nominal');

@@ -25,31 +25,8 @@ hold off
 
 %% Redefinition of weights for Simulink simulation
 
-% First we need to make some weights relevant as to the design
-% requirements:
-
-% We want gamma ~= 1
-% And we don't want too high gains
-% We want (almost) integral action meaning (almost) no steady state error
-% We don't want the actuator to go into saturation for a step-response
-
-% Example from book
-% Uses the Robust Control toolbox
-
-
-
-%It is very hard to get a Robust system that is fast. Either we go slow for
-%stability, or we go fast and get oscilations.
-
-%Fast setup, not very robust stable:
-
 %Setup 1
 M=10; wb=3; A=1.e-4; % Hvad betyder disse og hvor i bogen kommer de fra?
-
-%M=5; wb=5; A=1.e-3; % Hvad betyder disse og hvor i bogen kommer de fra?
-
-%1/M is the gain after the cutoff. We need a lower gain in the second
-%iteration, as we have a lower
 
 W1 = tf([1/M wb], [1 wb*A]);
 
@@ -63,39 +40,10 @@ W2= makeweight(0.2,40,100)%setup 1
 
 
 
-%wb=25;
-
-
-%W0 = W0*(s^2 + wb^2)/(s^2+(wb/Q)*s+wb^2)
-
-
-
-
-
-%Because S + T = I, mixsyn cannot make both S and T small 
-%(less than 0 dB) in the same frequency range. 
-%Therefore, when you specify weights for loop shaping, 
-%there must be a frequency band in which both W1 and W3 are below 0 dB.
-
-%W1= makeweight(50,0.05,0.8)%Robust stable, Setup 3
-
-%W2= makeweight(0.1,0.1,20)%Robust stable, Setup 3
-
-
-%Setup 2 gives us slight osscilations at 4 Hz, or 25 radians per second.
-%We know our approximation of W3 becomes unstable outside 25 rad/s, so
-%perhaps this is as good as it gets?
-
-
-
 
 
 [K,CL,gamma] = mixsyn(G,W1,W2,W3, 1); %Last argument makes the function try to force gamma to 1
-% [K,CL,gamma] = mixsyn(G,W1,[],[]);
 gamma
-
-% First, compare the resulting sensitivity S and complementary sensitivity 
-% T to the corresponding weighting functions W1 and W3. 
 
 L = G*K;
 I = eye(size(L));
@@ -170,10 +118,6 @@ hold off
 
 
 [numW2, denW2]=ss2tf(W2.A, W2.B, W2.C, W2.D,1);
-
-
-%Further, it is important that the controller does not have too high gains.
-%Our controller has crazy high gains
 
 
 x_0 = [0;0;0;0;0;0];            % Initial conditions
